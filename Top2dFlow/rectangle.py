@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math as mth
 import calculateRays as calculateRays
-from Utility import visualize
+from Utilities import visualize
 
 
 def showPlot(X, Y, u, v, p, obstacle, titleText="no text"):
