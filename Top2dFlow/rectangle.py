@@ -50,4 +50,4 @@ def showPlot(X, Y, u, v, p, obstacle, titleText="no text"):
 
 calculateRays.testR()
 visualize.testV()
-print("Done")
+print("Done test")
