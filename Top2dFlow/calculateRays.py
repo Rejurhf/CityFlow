@@ -26,28 +26,34 @@ def getShortestRoute(pointPos, xSize, ySize, densPerMeter, obstacles):
     downVisitedList = []
 
     # while point not moved forward
+    # try to go up
     while upPosX == pointPos[0]:
+        print("Up", upPosX, upPosY)
         upVisitedList.append((upPosX, upPosY))
-        if not isPointInObstacle((pointPos[0]+1, pointPos[1]), xSize, ySize, 
+        if not isPointInObstacle((upPosX+1, upPosY), xSize, ySize, 
                 densPerMeter, obstacles):
             upPosX += 1
-        elif not isPointInObstacle((pointPos[0], pointPos[1]+1), xSize, ySize, 
+        elif not isPointInObstacle((upPosX, upPosY+1), xSize, ySize, 
                 densPerMeter, obstacles):
             upPosY += 1
         else:
             upPosX -= 1
 
-    while downPosX == posX:
+    # try to go down
+    while downPosX == pointPos[0]:
+        print("down", downPosX, downPosY)
         downVisitedList.append((downPosX, downPosY))
-        if not isPointInObstacle((pointPos[0]+1, pointPos[1]), xSize, ySize, 
+        if not isPointInObstacle((downPosX+1, downPosY), xSize, ySize, 
                 densPerMeter, obstacles):
             downPosX += 1
-        elif not isPointInObstacle((pointPos[0], pointPos[1]-1), xSize, ySize, 
+        elif not isPointInObstacle((downPosX, downPosY-1), xSize, ySize, 
                 densPerMeter, obstacles):
             downPosY -= 1
         else:
             downPosX -= 1
 
+    print("return")
+    # get shorter route and return
     if len(downVisitedList) > len(upVisitedList):
         return upPosX, upPosY, upVisitedList
     else:
@@ -65,6 +71,7 @@ def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
     v = np.zeros((ny, nx))
     u = np.zeros((ny, nx))    # for u-velocity I initialise to 1 everywhere
 
+    
     for ray in range(ny):
         visitedPoints = []
         
@@ -80,6 +87,20 @@ def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
             if not isPointInObstacle((posX+1,posY), xSize, ySize, densPerMeter, obstacles):
                 # if point x+1 is not obstacle go right
                 posX += 1
+            elif isPointInObstacle((posX+1, posY), xSize, ySize, densPerMeter, obstacles) and \
+                    not isPointInObstacle((posX, posY + 1), xSize, ySize, densPerMeter, obstacles) and \
+                    not isPointInObstacle((posX, posY - 1), xSize, ySize, densPerMeter, obstacles):
+                print("getShortestRouteInit")
+                posX, posY, subVisitedList = getShortestRoute((posX, posY), xSize, ySize, densPerMeter, obstacles)
+                visitedPoints.extend(subVisitedList)
+
+            elif isPointInObstacle((posX+1, posY), xSize, ySize, densPerMeter, obstacles) and \
+                    not isPointInObstacle((posX, posY + 1), xSize, ySize, densPerMeter, obstacles):
+                posY += 1
+
+            elif isPointInObstacle((posX+1, posY), xSize, ySize, densPerMeter, obstacles) and \
+                    not isPointInObstacle((posX, posY - 1), xSize, ySize, densPerMeter, obstacles):
+                posY -= 1
             else:
                 posX = nx
 
