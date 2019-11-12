@@ -28,7 +28,6 @@ def getShortestRoute(pointPos, xSize, ySize, densPerMeter, obstacles):
     # while point not moved forward
     # try to go up
     while upPosX == pointPos[0]:
-        print("Up", upPosX, upPosY)
         upVisitedList.append((upPosX, upPosY))
         if not isPointInObstacle((upPosX+1, upPosY), xSize, ySize, 
                 densPerMeter, obstacles):
@@ -41,7 +40,6 @@ def getShortestRoute(pointPos, xSize, ySize, densPerMeter, obstacles):
 
     # try to go down
     while downPosX == pointPos[0]:
-        print("down", downPosX, downPosY)
         downVisitedList.append((downPosX, downPosY))
         if not isPointInObstacle((downPosX+1, downPosY), xSize, ySize, 
                 densPerMeter, obstacles):
@@ -52,7 +50,6 @@ def getShortestRoute(pointPos, xSize, ySize, densPerMeter, obstacles):
         else:
             downPosX -= 1
 
-    print("return")
     # get shorter route and return
     if len(downVisitedList) > len(upVisitedList):
         return upPosX, upPosY, upVisitedList
@@ -88,61 +85,88 @@ def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
                 # if point x+1 is not obstacle go right
                 posX += 1
             elif isPointInObstacle((posX+1, posY), xSize, ySize, densPerMeter, obstacles) and \
-                    not isPointInObstacle((posX, posY + 1), xSize, ySize, densPerMeter, obstacles) and \
-                    not isPointInObstacle((posX, posY - 1), xSize, ySize, densPerMeter, obstacles):
-                print("getShortestRouteInit")
-                posX, posY, subVisitedList = getShortestRoute((posX, posY), xSize, ySize, densPerMeter, obstacles)
+                    not isPointInObstacle((posX, posY + 1), xSize, ySize, densPerMeter, 
+                    obstacles) and \
+                    not isPointInObstacle((posX, posY - 1), xSize, ySize, densPerMeter, 
+                    obstacles):
+                # get shortest route to move further
+                posX, posY, subVisitedList = getShortestRoute((posX, posY), xSize, ySize, 
+                    densPerMeter, obstacles)
                 visitedPoints.extend(subVisitedList)
-
             elif isPointInObstacle((posX+1, posY), xSize, ySize, densPerMeter, obstacles) and \
-                    not isPointInObstacle((posX, posY + 1), xSize, ySize, densPerMeter, obstacles):
+                    not isPointInObstacle((posX, posY + 1), xSize, ySize, densPerMeter, 
+                    obstacles):
+                # only up path available
                 posY += 1
-
             elif isPointInObstacle((posX+1, posY), xSize, ySize, densPerMeter, obstacles) and \
-                    not isPointInObstacle((posX, posY - 1), xSize, ySize, densPerMeter, obstacles):
+                    not isPointInObstacle((posX, posY - 1), xSize, ySize, densPerMeter, 
+                    obstacles):
+                # only down path available
                 posY -= 1
             else:
+                # no exit end program to avoid infinite loop
                 posX = nx
 
-        # decode visitedList to flow
+
         if visitedPoints:
-            prewPoint = (-1,-1)
-            for point in visitedPoints:
-                if prewPoint == (-1,-1):
-                    u[point[1], point[0]] = 1
-                elif point[1] > prewPoint[1]:
-                    if v[point[1], point[0]] == 0:
-                        v[point[1], point[0]] = 1
-                    else:
-                        v[point[1], point[0]] += 1
-                elif point[1] < prewPoint[1]:
-                    if v[point[1], point[0]] == 0:
-                        v[point[1], point[0]] = -1
-                    else:
-                        v[point[1], point[0]] += -1
-                elif point[0] > prewPoint[0]:
-                    if u[point[1], point[0]] == 0:
-                        u[point[1], point[0]] = 1
-                    else:
-                        u[point[1], point[0]] += 1
-                elif point[0] < prewPoint[0]:
-                    if u[point[1], point[0]] == 0:
-                        u[point[1], point[0]] = -1
-                    else:
-                        u[point[1], point[0]] += -1
-                prewPoint = point
+            for i in range(1, len(visitedPoints)-1):
+                # starting point of ray
+                if i == 1:
+                    u[visitedPoints[i-1][1], visitedPoints[i-1][0]] = 1
+
+                if visitedPoints[i+1][0] == visitedPoints[i-1][0]+2:
+                    # go straight right
+                    u[visitedPoints[i][1], visitedPoints[i][0]] += 1
+                elif visitedPoints[i+1][0] == visitedPoints[i-1][0]-2:
+                    # go straight left
+                    u[visitedPoints[i][1], visitedPoints[i][0]] -= 1
+                elif visitedPoints[i+1][1] == visitedPoints[i-1][1]+2:
+                    # go straight up
+                    v[visitedPoints[i][1], visitedPoints[i][0]] += 1
+                elif visitedPoints[i+1][1] == visitedPoints[i-1][1]-2:
+                    # go straight down
+                    v[visitedPoints[i][1], visitedPoints[i][0]] -= 1
+                elif visitedPoints[i+1][0] == visitedPoints[i-1][0]+1 and \
+                        visitedPoints[i+1][1] == visitedPoints[i-1][1]+1:
+                    # go up right
+                    u[visitedPoints[i][1], visitedPoints[i][0]] += 0.5
+                    v[visitedPoints[i][1], visitedPoints[i][0]] += 0.5
+                elif visitedPoints[i+1][0] == visitedPoints[i-1][0]+1 and \
+                        visitedPoints[i+1][1] == visitedPoints[i-1][1]-1:
+                    # go down right
+                    u[visitedPoints[i][1], visitedPoints[i][0]] += 0.5
+                    v[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
+                elif visitedPoints[i+1][0] == visitedPoints[i-1][0]-1 and \
+                        visitedPoints[i+1][1] == visitedPoints[i-1][1]+1:
+                    # go up left
+                    u[visitedPoints[i][1], visitedPoints[i][0]] += 0.5
+                    v[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
+                elif visitedPoints[i+1][0] == visitedPoints[i-1][0]-1 and \
+                        visitedPoints[i+1][1] == visitedPoints[i-1][1]-1:
+                    # go down left
+                    u[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
+                    v[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
+
+                # # determine flow from path
+                # if visitedPoints[i][1] > visitedPoints[i-1][1]:
+                #     # move up
+                #     if visitedPoints[i][1] == visitedPoints[i+1][1]:
+                #         v[visitedPoints[i][1], visitedPoints[i][0]] += 1
+
+                # elif visitedPoints[i][1] < visitedPoints[i-1][1]:
+                #     # move down
+                #     v[visitedPoints[i][1], visitedPoints[i][0]] -= 1
+                # elif visitedPoints[i][0] > visitedPoints[i-1][0]:
+                #     # move forward
+                #     u[visitedPoints[i][1], visitedPoints[i][0]] += 1
+                # elif visitedPoints[i][0] < visitedPoints[i-1][0]:
+                #     # move backward
+                #     u[visitedPoints[i][1], visitedPoints[i][0]] -= 1
             
     p = np.zeros((ny, nx)) # np.add(np.absolute(u), np.absolute(v))
     p = u
     # u[u == 1] = 0
 
-    # fill array with 0 if obstacle and 1 if not
-    # for i in range(ny):
-    #     for j in range(nx):
-    #         if isPointInObstacle((j, i), xSize, ySize, densPerMeter, obstacles):
-    #             u[i,j] = 0
-    #         else:
-    #             u[i,j] = 1
     u[0,0] = 2.3
 
     return X, Y, u, v, p
