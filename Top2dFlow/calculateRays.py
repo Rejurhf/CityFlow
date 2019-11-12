@@ -1,7 +1,7 @@
 import numpy as np
 import math as mth
 
-# Is point in obstacle check ---------------------------------------------------
+# Is point in obstacle check -------------------------------------------------------------
 def isPointInObstacle(point, xSize, ySize, densPerMeter, obstacles):
     for obstacle in obstacles:
         leftBorder = mth.ceil(obstacle[0] * densPerMeter)
@@ -15,7 +15,7 @@ def isPointInObstacle(point, xSize, ySize, densPerMeter, obstacles):
     return False
 
 
-# Get shortest route -----------------------------------------------------------
+# Get shortest route ---------------------------------------------------------------------
 def getShortestRoute(pointPos, xSize, ySize, densPerMeter, obstacles):
     # declare start moving point, and empty positions lists
     upPosX = pointPos[0]
@@ -53,7 +53,7 @@ def getShortestRoute(pointPos, xSize, ySize, densPerMeter, obstacles):
     else:
         return downPosX, downPosY, downVisitedList 
 
-# Main -------------------------------------------------------------------------
+# Main -----------------------------------------------------------------------------------
 def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
     nx = int(xSize * densPerMeter) + 1 # number of points in grid
     ny = int(ySize * densPerMeter) + 1
@@ -77,8 +77,7 @@ def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
 
             # Determine action
             # TODO determine more actions
-            if not isPointInObstacle((posX+1, posY), xSize, ySize, \
-                    densPerMeter, obstacles):
+            if not isPointInObstacle((posX+1,posY), xSize, ySize, densPerMeter, obstacles):
                 # if point x+1 is not obstacle go right
                 posX += 1
             else:
