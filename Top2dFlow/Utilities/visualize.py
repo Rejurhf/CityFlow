@@ -5,9 +5,9 @@ def showPlot(X, Y, u, v, p, obstacles, titleText="no text"):
     # Plot the last figure on screen
     fig = plt.figure(figsize=(60, 30), dpi=25)
     plt.contourf(X, Y, p, alpha=0.5)  # alpha - background intensity
-    plt.tick_params(axis='both', which='major', labelsize=80)
+    plt.tick_params(axis='both', which='major', labelsize=50)
     cbar = plt.colorbar()
-    cbar.ax.tick_params(labelsize=80)
+    cbar.ax.tick_params(labelsize=50)
     plt.contour(X, Y, p)
     M = np.hypot(u, v)
     plt.quiver(X, Y, u, v, M, scale=1 / 0.02)  ##plotting velocity
