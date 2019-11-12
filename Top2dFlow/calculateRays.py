@@ -56,6 +56,21 @@ def getShortestRoute(pointPos, xSize, ySize, densPerMeter, obstacles):
     else:
         return downPosX, downPosY, downVisitedList 
 
+
+def determineTarget(pointPos, xSize, ySize, densPerMeter, obstacles):
+    nearObsIndex = 0
+
+    # find nearest obstacle checking them one by one
+    for i in range(len(obstacles)):
+        if isPointInObstacle(pointPos, xSize, ySize, densPerMeter, [obstacles[i]]):
+            nearObsIndex = i
+
+    # calculate middle of obstacle y position
+    nearObs = obstacles[nearObsIndex]
+    target = int((nearObs[2] + (nearObs[3]/2)) * densPerMeter)
+    return target
+
+
 # Main -----------------------------------------------------------------------------------
 def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
     nx = int(xSize * densPerMeter) + 1 # number of points in grid
@@ -75,20 +90,34 @@ def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
         # Initial ray position
         posX = 0
         posY = ray
+        targetY = -1
 
         while posX < nx and 0 <= posY <= ny:
             visitedPoints.append((posX, posY))
 
             # Determine action
-            # TODO determine more actions
             if not isPointInObstacle((posX+1,posY), xSize, ySize, densPerMeter, obstacles):
                 # if point x+1 is not obstacle go right
-                posX += 1
+                if len(visitedPoints) > 1 and targetY >= 0 and targetY != posY and \
+                        visitedPoints[-1][1] == visitedPoints[-2][1]:
+                    if targetY < posY and not isPointInObstacle((posX, posY-1), 
+                            xSize, ySize, densPerMeter, obstacles):
+                        posY -= 1
+                    elif targetY > posY and not isPointInObstacle((posX, posY+1), 
+                            xSize, ySize, densPerMeter, obstacles):
+                        posY += 1
+                    else:
+                        posX += 1
+                else:
+                    posX += 1
             elif isPointInObstacle((posX+1, posY), xSize, ySize, densPerMeter, obstacles) and \
                     not isPointInObstacle((posX, posY + 1), xSize, ySize, densPerMeter, 
                     obstacles) and \
                     not isPointInObstacle((posX, posY - 1), xSize, ySize, densPerMeter, 
                     obstacles):
+                # get Y middle of nearest obstacle as target
+                targetY = determineTarget((posX+1, posY), xSize, ySize, densPerMeter, obstacles)
+
                 # get shortest route to move further
                 posX, posY, subVisitedList = getShortestRoute((posX, posY), xSize, ySize, 
                     densPerMeter, obstacles)
@@ -147,21 +176,6 @@ def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
                     u[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
                     v[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
 
-                # # determine flow from path
-                # if visitedPoints[i][1] > visitedPoints[i-1][1]:
-                #     # move up
-                #     if visitedPoints[i][1] == visitedPoints[i+1][1]:
-                #         v[visitedPoints[i][1], visitedPoints[i][0]] += 1
-
-                # elif visitedPoints[i][1] < visitedPoints[i-1][1]:
-                #     # move down
-                #     v[visitedPoints[i][1], visitedPoints[i][0]] -= 1
-                # elif visitedPoints[i][0] > visitedPoints[i-1][0]:
-                #     # move forward
-                #     u[visitedPoints[i][1], visitedPoints[i][0]] += 1
-                # elif visitedPoints[i][0] < visitedPoints[i-1][0]:
-                #     # move backward
-                #     u[visitedPoints[i][1], visitedPoints[i][0]] -= 1
             
     p = np.zeros((ny, nx)) # np.add(np.absolute(u), np.absolute(v))
     p = u
