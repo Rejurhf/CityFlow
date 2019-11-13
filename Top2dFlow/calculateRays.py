@@ -96,6 +96,7 @@ def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
             visitedPoints.append((posX, posY))
 
             # Determine action
+            # TODO targetY zależne od tego w którym miejscu uderzony został obiekt
             if not isPointInObstacle((posX+1,posY), xSize, ySize, densPerMeter, obstacles):
                 # if point x+1 is not obstacle go right
                 if len(visitedPoints) > 1 and targetY >= 0 and targetY != posY and \
