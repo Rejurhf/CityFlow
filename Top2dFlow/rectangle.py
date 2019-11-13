@@ -1,7 +1,7 @@
 import calculateTopRays as topRays
 from Utilities import visualize
 
-
+print("Calculate Top Rays")
 xSize = 20  # nuberic size of in eg metres
 ySize = 10
 densPerMeter = 2.5 # points density per 1 meter
@@ -22,4 +22,4 @@ X, Y, u, v, p = topRays.getFlowPathTopArrays(xSize, ySize, densPerMeter,
 # showPlot(X, Y, u, v, p, obstacle, "Title")
 
 visualize.showPlot(X, Y, u, v, p, obstacles, "Test")
-print("Done")
+print("Top Rays Done")

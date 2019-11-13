@@ -177,12 +177,10 @@ def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
                     u[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
                     v[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
 
-            
+    
     p = np.zeros((ny, nx)) # np.add(np.absolute(u), np.absolute(v))
     p = np.add(np.absolute(u), np.absolute(v))
     # p = u
     # u[u == 1] = 0
-
-    u[0,0] = 2.3
 
     return X, Y, u, v, p

@@ -8,7 +8,7 @@ ySize = 10
 densPerMeter = 2.5 # points density per 1 meter
 
 # Draw in xSize, ySize [left, width, bottom, height]
-obstacles = [[5, 3, 0, 5]]
+obstacles = [[6, 3, 0, 3]]
 
 X, Y, u, v, p = sideRays.getFlowPathSideArrays(xSize, ySize, densPerMeter, obstacles)
 
