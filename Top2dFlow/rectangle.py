@@ -1,5 +1,4 @@
-
-import calculateRays as calculateRays
+import calculateTopRays as topRays
 from Utilities import visualize
 
 
@@ -10,7 +9,7 @@ densPerMeter = 2.5 # points density per 1 meter
 # Draw in xSize, ySize [left, width, bottom, height]
 obstacles = [[5,1.5,4.1,3.9], [13, 2, 2.6, 2]]
 
-X, Y, u, v, p = calculateRays.getFlowPathTopArrays(xSize, ySize, densPerMeter, 
+X, Y, u, v, p = topRays.getFlowPathTopArrays(xSize, ySize, densPerMeter, 
     obstacles)
 
 
