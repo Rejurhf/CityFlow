@@ -112,16 +112,10 @@ def getFlowPathTopArrays(xSize, ySize, densPerMeter, obstacles):
                 prewPoint = point
             
     p = np.zeros((ny, nx)) # np.add(np.absolute(u), np.absolute(v))
-    p = u
+    p = np.add(np.absolute(u), np.absolute(v))
+    # p = u
     # u[u == 1] = 0
 
-    # fill array with 0 if obstacle and 1 if not
-    # for i in range(ny):
-    #     for j in range(nx):
-    #         if isPointInObstacle((j, i), xSize, ySize, densPerMeter, obstacles):
-    #             u[i,j] = 0
-    #         else:
-    #             u[i,j] = 1
     u[0,0] = 2.3
 
     return X, Y, u, v, p
