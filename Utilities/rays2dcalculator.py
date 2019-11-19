@@ -94,7 +94,8 @@ class Rays2dCalculator:
 
     # calculate middle of obstacle y position
     nearObs = self.obstacleList[nearObsIndex]
-    target = int((nearObs[2] + (nearObs[3]/2)) * self.densPerMeter)
+    # centerOfObstacle = int((nearObs[2] + (nearObs[3]/2)) * self.densPerMeter)
+    target = pointPos[1]
     return target
 
 
@@ -123,11 +124,11 @@ class Rays2dCalculator:
         visitedPoints.append((posX, posY))
 
         # Determine action
-        # TODO targetY zależne od tego w którym miejscu uderzony został obiekt
         if not self.isPointInObstacle((posX+1,posY)):
           # if point x+1 is not obstacle go right
           if len(visitedPoints) > 1 and targetY >= 0 and targetY != posY and \
-              visitedPoints[-1][1] == visitedPoints[-2][1]:
+              visitedPoints[-1][1] == visitedPoints[-2][1] and \
+              visitedPoints[-1][1] == visitedPoints[-3][1]:
             if targetY < posY and not self.isPointInObstacle((posX, posY-1)):
               posY -= 1
             elif targetY > posY and not self.isPointInObstacle((posX, posY+1)):
@@ -235,7 +236,8 @@ class Rays2dCalculator:
         if not self.isPointInObstacle((posX+1,posY)):
           # if point x+1 is not obstacle go right
           if len(visitedPoints) > 1 and targetY >= 0 and targetY != posY and \
-              visitedPoints[-1][1] == visitedPoints[-2][1]:
+              visitedPoints[-1][1] == visitedPoints[-2][1] and \
+              visitedPoints[-1][1] == visitedPoints[-3][1]:
             if targetY < posY and not self.isPointInObstacle((posX, posY-1)):
               posY -= 1
             elif targetY > posY and not self.isPointInObstacle((posX, posY+1)):
