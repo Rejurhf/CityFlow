@@ -11,48 +11,87 @@ class AirFlow:
     self.obstacleList = obstacleList
     
     # Calculate points in every axis
-    nx = int(self.xSize * self.densPerMeter) + 1 # number of points in grid
-    ny = int(self.ySize * self.densPerMeter) + 1
-    nz = int(self.zSize * self.densPerMeter) + 1
+    self.nx = int(self.xSize * self.densPerMeter) + 1 # number of points in grid
+    self.ny = int(self.ySize * self.densPerMeter) + 1
+    self.nz = int(self.zSize * self.densPerMeter) + 1
 
     # Create 3d arrays
-    self.vX = np.zeros((nz, ny, nx))
-    self.vY = np.zeros((nz, ny, nx))
-    self.vZ = np.zeros((nz, ny, nx))
-    self.p = np.zeros((nz, ny, nx))
+    self.vX = np.zeros((self.nz, self.ny, self.nx))
+    self.vY = np.zeros((self.nz, self.ny, self.nx))
+    self.vZ = np.zeros((self.nz, self.ny, self.nx))
+    self.p = np.zeros((self.nz, self.ny, self.nx))
 
   # Convert 3d obstacles to 2d
-  def convertObstaclesTo2d(self, isTopView = True):
+  def convertObstaclesTo2d(self, layer, isTopView = True):
     obstacleList2d = []
     if isTopView:
       for obstacle in self.obstacleList:
-        obstacleList2d.append([obstacle[0], obstacle[1], obstacle[2], obstacle[3]])
+        obstZStartLayer = int(obstacle[4] * self.densPerMeter)
+        obstZEndLayer = int((obstacle[4]+obstacle[5]) * self.densPerMeter)
+        if obstZStartLayer <= layer <= obstZEndLayer:
+          obstacleList2d.append([obstacle[0], obstacle[1], obstacle[2], obstacle[3]])
     else:
       for obstacle in self.obstacleList:
-        obstacleList2d.append([obstacle[0], obstacle[1], obstacle[4], obstacle[5]])
+        obstYStartLayer = int(obstacle[2] * self.densPerMeter)
+        obstYEndLayer = int((obstacle[2]+obstacle[3]) * self.densPerMeter)
+        if obstYStartLayer <= layer <= obstYEndLayer:
+          obstacleList2d.append([obstacle[0], obstacle[1], obstacle[4], obstacle[5]])
     
     return obstacleList2d
 
 
   # Get side view from 3d array
   def getSideView2dArray(self, array3d, yLayer):
-    # Calculate points in every axis
-    nx = int(self.xSize * self.densPerMeter) + 1 # number of points in grid
-    nz = int(self.zSize * self.densPerMeter) + 1
-
     # Declare empty array to return
-    array2d = np.empty([nz, nx])
+    array2d = np.empty([self.nz, self.nx])
 
     # Convert 3d array to 2d
-    for i in range(nz):
-      for j in range(nx):
+    for i in range(self.nz):
+      for j in range(self.nx):
         array2d[i,j] = array3d[i, yLayer, j]
       
     return array2d
 
 
+  # Copy layer to 3d array
+  def copyLayerTo3DArray(self, array1, array2, layer, isTopView = True):
+    if isTopView:
+      # Copy top view array to 3d array
+      for i in range(self.ny):
+        for j in range(self.nx):
+          self.vX[layer, i, j] += array1[i, j]
+          self.vY[layer, i, j] += array2[i, j]
+    else:
+      for i in range(self.nz):
+        for j in range(self.nx):
+          self.vX[i, layer, j] += array1[i, j]
+          self.vZ[i, layer, j] += array2[i, j]
+
+
+
   # Calculate flow -----------------------------------------------------------------------
   def calculateFlow(self):
+    # Simulate top layers
+    for i in range(self.nz):
+      # Get obstacles for layer
+      obstaclesForLayer = self.convertObstaclesTo2d(i)
+      # Simulate layer
+      topView = rays2dcalculator.Rays2dCalculator(self.xSize, self.ySize, 
+        self.densPerMeter, obstaclesForLayer)
+      X, Y, x, y, pt = topView.getFlowPathTopArray()
+      # Copy layer top 3d array
+      self.copyLayerTo3DArray(x, y, i)
+    print("AF:", "Top view calculated")
+
+    # Simulate side layers
+    for i in range(self.ny):
+      obstaclesForLayer = self.convertObstaclesTo2d(i, isTopView=False)
+      sideView = rays2dcalculator.Rays2dCalculator(self.xSize, self.zSize,
+        self.densPerMeter, obstaclesForLayer)
+      X, Z, x, z, pt = sideView.getFlowPathSideArray()
+      self.copyLayerTo3DArray(x, z, i, isTopView=False)
+    print("AF:", "Side view calculated")
+    
     print("AF:", "Flow calculated")
 
 
@@ -61,18 +100,14 @@ class AirFlow:
     # Calculate layer coresponding to given meter
     zLayer = int(meterAboveGround * self.densPerMeter)
 
-    # Calculate values for plot
-    nx = int(self.xSize * self.densPerMeter) + 1 # number of points in grid
-    ny = int(self.ySize * self.densPerMeter) + 1
-
-    x = np.linspace(0, self.xSize, nx) # last point included, so exactly nx points
-    y = np.linspace(0, self.ySize, ny) # last point included, so exactly ny points
+    x = np.linspace(0, self.xSize, self.nx) # last point included, so exactly self.nx points
+    y = np.linspace(0, self.ySize, self.ny) # last point included, so exactly self.ny points
     
     X,Y = np.meshgrid(x, y)     # makes 2-dimensional mesh grid
     array2dX = self.vX[zLayer]  # Get layers
     array2dY = self.vY[zLayer]
     array2dP = self.p[zLayer]
-    listOf2dObstacles = self.convertObstaclesTo2d(isTopView = True)
+    listOf2dObstacles = self.convertObstaclesTo2d(zLayer, isTopView = True)
 
     # Print text and display plot
     titleText = "{}m above ground ({} Z axis layer)".format(meterAboveGround, zLayer+1)
@@ -85,18 +120,14 @@ class AirFlow:
     # Calculate layer coresponding to given meter
     yLayer = int(meterFromY0 * self.densPerMeter)
 
-    # Calculate values for plot
-    nx = int(self.xSize * self.densPerMeter) + 1 # number of points in grid
-    nz = int(self.zSize * self.densPerMeter) + 1
-
-    x = np.linspace(0, self.xSize, nx) # last point included, so exactly nx points
-    z = np.linspace(0, self.zSize, nz) # last point included, so exactly ny points
+    x = np.linspace(0, self.xSize, self.nx) # last point included, so exactly self.nx points
+    z = np.linspace(0, self.zSize, self.nz) # last point included, so exactly self.ny points
     
     X,Z = np.meshgrid(x, z)     # makes 2-dimensional mesh grid
     array2dX = self.getSideView2dArray(self.vX, yLayer) # Get layers
     array2dZ = self.getSideView2dArray(self.vZ, yLayer)
     array2dP = self.getSideView2dArray(self.p, yLayer)
-    listOf2dObstacles = self.convertObstaclesTo2d(isTopView = False)
+    listOf2dObstacles = self.convertObstaclesTo2d(yLayer, isTopView = False)
     
     # Print text and display plot
     titleText = "{}m from left ({} Y axis layer)".format(meterFromY0, yLayer+1)

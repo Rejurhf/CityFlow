@@ -14,10 +14,13 @@ obstacleList = [[6, 3, 8, 4, 0, 4]]
 testFlow = airflow.AirFlow(xSize, ySize, zSize, densPerMeter, obstacleList)
 
 # Make simulation
+print("FFC:", "Start simulation")
 testFlow.calculateFlow()
 
 # Get top view for 2m above ground
+print("FFC:", "Show Top View")
 testFlow.getTopViewLayerForMeter(2)
 
 # Get side view for 10m from left
+print("FFC:", "Show Side View")
 testFlow.getSideViewLayerForMeter(10)
