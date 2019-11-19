@@ -92,6 +92,13 @@ class AirFlow:
       self.copyLayerTo3DArray(x, z, i, isTopView=False)
     print("AF:", "Side view calculated")
     
+
+    # Reduce duplications in vX array
+    self.vX /= 2
+
+    # Calculate pressure
+    self.p = np.absolute(self.vX) + np.absolute(self.vY) + np.absolute(self.vZ)
+
     print("AF:", "Flow calculated")
 
 
