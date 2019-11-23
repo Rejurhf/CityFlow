@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="CGImap 0.7.5 (21383 thorn-01.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+ <bounds minlat="50.0141600" minlon="19.9711900" maxlat="50.0147800" maxlon="19.9723900"/>
+ <node id="288038577" visible="true" version="2" changeset="10976794" timestamp="2012-03-14T11:33:52Z" user="vinci4352" uid="598456" lat="50.0149000" lon="19.9712501"/>
+ <node id="288038666" visible="true" version="2" changeset="63014650" timestamp="2018-09-28T16:32:46Z" user="jermig" uid="3195570" lat="50.0144715" lon="19.9734731"/>
+ <node id="288038667" visible="true" version="3" changeset="63014650" timestamp="2018-09-28T16:32:46Z" user="jermig" uid="3195570" lat="50.0143644" lon="19.9736971"/>
+ <node id="749779800" visible="true" version="2" changeset="22777930" timestamp="2014-06-06T15:49:47Z" user="Mateusz Konieczny" uid="1722488" lat="50.0128517" lon="19.9760255"/>
+ <node id="1497793282" visible="true" version="1" changeset="9792219" timestamp="2011-11-10T21:17:23Z" user="CISU90" uid="541972" lat="50.0132806" lon="19.9753816"/>
+ <node id="1497793866" visible="true" version="4" changeset="50184946" timestamp="2017-07-10T19:24:45Z" user="Meijinaerum" uid="336767" lat="50.0147830" lon="19.9709946"/>
+ <node id="1674435185" visible="true" version="1" changeset="10976794" timestamp="2012-03-14T11:30:29Z" user="vinci4352" uid="598456" lat="50.0139113" lon="19.9744114"/>
+ <node id="1674435202" visible="true" version="2" changeset="49555551" timestamp="2017-06-15T10:35:58Z" user="Meijinaerum" uid="336767" lat="50.0142035" lon="19.9723675"/>
+ <node id="1674435209" visible="true" version="2" changeset="63014650" timestamp="2018-09-28T16:32:46Z" user="jermig" uid="3195570" lat="50.0142440" lon="19.9738858"/>
+ <node id="1674435217" visible="true" version="2" changeset="50184946" timestamp="2017-07-10T19:24:45Z" user="Meijinaerum" uid="336767" lat="50.0142932" lon="19.9716303"/>
+ <node id="1674435220" visible="true" version="1" changeset="10976794" timestamp="2012-03-14T11:30:34Z" user="vinci4352" uid="598456" lat="50.0145022" lon="19.9733642"/>
+ <node id="1674435221" visible="true" version="1" changeset="10976794" timestamp="2012-03-14T11:30:34Z" user="vinci4352" uid="598456" lat="50.0146272" lon="19.9728245"/>
+ <node id="1674435222" visible="true" version="2" changeset="49555551" timestamp="2017-06-15T10:35:58Z" user="Meijinaerum" uid="336767" lat="50.0147063" lon="19.9723548"/>
+ <node id="1674435229" visible="true" version="2" changeset="50184946" timestamp="2017-07-10T19:24:45Z" user="Meijinaerum" uid="336767" lat="50.0148434" lon="19.9716071"/>
+ <node id="1914112866" visible="true" version="2" changeset="49555551" timestamp="2017-06-15T10:35:58Z" user="Meijinaerum" uid="336767" lat="50.0140707" lon="19.9713632"/>
+ <node id="1914112869" visible="true" version="1" changeset="13107903" timestamp="2012-09-14T14:18:51Z" user="Anonimz" uid="664276" lat="50.0142395" lon="19.9730251"/>
+ <node id="1914112870" visible="true" version="2" changeset="49555551" timestamp="2017-06-15T10:35:58Z" user="Meijinaerum" uid="336767" lat="50.0139910" lon="19.9719804"/>
+ <node id="1914112874" visible="true" version="1" changeset="13107903" timestamp="2012-09-14T14:18:51Z" user="Anonimz" uid="664276" lat="50.0138203" lon="19.9722835"/>
+ <node id="1914112889" visible="true" version="2" changeset="49555551" timestamp="2017-06-15T10:35:58Z" user="Meijinaerum" uid="336767" lat="50.0141371" lon="19.9722500"/>
+ <node id="1914112910" visible="true" version="3" changeset="50184946" timestamp="2017-07-10T19:24:46Z" user="Meijinaerum" uid="336767" lat="50.0137225" lon="19.9721318"/>
+ <node id="1914112926" visible="true" version="1" changeset="13107903" timestamp="2012-09-14T14:18:53Z" user="Anonimz" uid="664276" lat="50.0143546" lon="19.9717390"/>
+ <node id="1914112927" visible="true" version="3" changeset="50184946" timestamp="2017-07-10T19:24:47Z" user="Meijinaerum" uid="336767" lat="50.0141529" lon="19.9714777"/>
+ <node id="1914112931" visible="true" version="3" changeset="50184946" timestamp="2017-07-10T19:24:47Z" user="Meijinaerum" uid="336767" lat="50.0139529" lon="19.9712047"/>
+ <node id="1914112943" visible="true" version="2" changeset="49555551" timestamp="2017-06-15T10:35:58Z" user="Meijinaerum" uid="336767" lat="50.0141528" lon="19.9719705"/>
+ <node id="1914112952" visible="true" version="2" changeset="49555551" timestamp="2017-06-15T10:35:58Z" user="Meijinaerum" uid="336767" lat="50.0142292" lon="19.9724646"/>
+ <node id="1914112956" visible="true" version="2" changeset="49555551" timestamp="2017-06-15T10:35:58Z" user="Meijinaerum" uid="336767" lat="50.0141646" lon="19.9717674"/>
+ <node id="1914112959" visible="true" version="1" changeset="13107903" timestamp="2012-09-14T14:18:54Z" user="Anonimz" uid="664276" lat="50.0142684" lon="19.9729165"/>
+ <node id="1914112960" visible="true" version="3" changeset="50184946" timestamp="2017-07-10T19:24:47Z" user="Meijinaerum" uid="336767" lat="50.0138654" lon="19.9719891"/>
+ <node id="1914113001" visible="true" version="3" changeset="50184946" timestamp="2017-07-10T19:24:48Z" user="Meijinaerum" uid="336767" lat="50.0141693" lon="19.9716413"/>
+ <node id="3459937562" visible="true" version="1" changeset="30271566" timestamp="2015-04-16T18:26:36Z" user="Władysław Komorek" uid="693154" lat="50.0142529" lon="19.9713947"/>
+ <node id="3459937563" visible="true" version="1" changeset="30271566" timestamp="2015-04-16T18:26:36Z" user="Władysław Komorek" uid="693154" lat="50.0142734" lon="19.9722661"/>
+ <node id="3459937564" visible="true" version="1" changeset="30271566" timestamp="2015-04-16T18:26:36Z" user="Władysław Komorek" uid="693154" lat="50.0146076" lon="19.9720914"/>
+ <node id="3459952005" visible="true" version="1" changeset="30271566" timestamp="2015-04-16T18:26:36Z" user="Władysław Komorek" uid="693154" lat="50.0145917" lon="19.9713789"/>
+ <node id="3459952006" visible="true" version="1" changeset="30271566" timestamp="2015-04-16T18:26:37Z" user="Władysław Komorek" uid="693154" lat="50.0146105" lon="19.9722508"/>
+ <node id="3459961166" visible="true" version="1" changeset="30271566" timestamp="2015-04-16T18:26:36Z" user="Władysław Komorek" uid="693154" lat="50.0142560" lon="19.9715522"/>
+ <node id="3459961798" visible="true" version="1" changeset="30271566" timestamp="2015-04-16T18:26:36Z" user="Władysław Komorek" uid="693154" lat="50.0142705" lon="19.9721067"/>
+ <node id="3459961799" visible="true" version="1" changeset="30271566" timestamp="2015-04-16T18:26:36Z" user="Władysław Komorek" uid="693154" lat="50.0145948" lon="19.9715363"/>
+ <node id="4962515998" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0146880" lon="19.9720760"/>
+ <node id="4962515999" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0146347" lon="19.9723566"/>
+ <node id="4962516000" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0144550" lon="19.9733032"/>
+ <node id="4962516001" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0143542" lon="19.9716277"/>
+ <node id="4962516025" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0147765" lon="19.9716099"/>
+ <node id="4962516026" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0148001" lon="19.9714953"/>
+ <node id="4962516028" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0147863" lon="19.9715629"/>
+ <node id="4962516029" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0148109" lon="19.9714070"/>
+ <node id="4962516030" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0148139" lon="19.9712951"/>
+ <node id="4962516031" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0148094" lon="19.9711803"/>
+ <node id="4962516032" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:41Z" user="Meijinaerum" uid="336767" lat="50.0148027" lon="19.9710922"/>
+ <node id="4962516041" visible="true" version="2" changeset="70840953" timestamp="2019-06-01T18:05:30Z" user="rayleigh1" uid="6739817" lat="50.0148563" lon="19.9715223">
+  <tag k="crossing" v="marked"/>
+  <tag k="highway" v="crossing"/>
+ </node>
+ <node id="5937145703" visible="true" version="1" changeset="63014650" timestamp="2018-09-28T16:32:46Z" user="jermig" uid="3195570" lat="50.0144071" lon="19.9736226"/>
+ <way id="60279412" visible="true" version="6" changeset="59097204" timestamp="2018-05-19T07:58:49Z" user="Sparrowbe" uid="2061097">
+  <nd ref="3459937564"/>
+  <nd ref="3459961798"/>
+  <nd ref="3459937563"/>
+  <nd ref="3459952006"/>
+  <nd ref="3459937564"/>
+  <tag k="addr:city" v="Kraków"/>
+  <tag k="addr:country" v="PL"/>
+  <tag k="addr:housenumber" v="4"/>
+  <tag k="addr:postcode" v="30-686"/>
+  <tag k="addr:street" v="Podedworze"/>
+  <tag k="building" v="apartments"/>
+  <tag k="building:levels" v="11"/>
+  <tag k="roof:levels" v="1"/>
+  <tag k="roof:shape" v="flat"/>
+ </way>
+ <way id="60279418" visible="true" version="6" changeset="59097204" timestamp="2018-05-19T07:58:13Z" user="Sparrowbe" uid="2061097">
+  <nd ref="3459952005"/>
+  <nd ref="3459937562"/>
+  <nd ref="3459961166"/>
+  <nd ref="3459961799"/>
+  <nd ref="3459952005"/>
+  <tag k="addr:city" v="Kraków"/>
+  <tag k="addr:country" v="PL"/>
+  <tag k="addr:housenumber" v="2"/>
+  <tag k="addr:postcode" v="30-686"/>
+  <tag k="addr:street" v="Podedworze"/>
+  <tag k="building" v="apartments"/>
+  <tag k="building:levels" v="11"/>
+  <tag k="roof:levels" v="1"/>
+  <tag k="roof:shape" v="flat"/>
+ </way>
+ <way id="154995695" visible="true" version="3" changeset="74758084" timestamp="2019-09-21T19:54:17Z" user="Władysław Komorek" uid="693154">
+  <nd ref="1674435222"/>
+  <nd ref="4962515999"/>
+  <nd ref="1674435202"/>
+  <tag k="highway" v="service"/>
+  <tag k="service" v="driveway"/>
+ </way>
+ <way id="154995740" visible="true" version="3" changeset="74758084" timestamp="2019-09-21T19:54:17Z" user="Władysław Komorek" uid="693154">
+  <nd ref="1674435229"/>
+  <nd ref="4962516025"/>
+  <nd ref="4962516001"/>
+  <nd ref="1674435217"/>
+  <tag k="highway" v="service"/>
+  <tag k="service" v="driveway"/>
+ </way>
+ <way id="180965112" visible="true" version="2" changeset="49555551" timestamp="2017-06-15T10:35:58Z" user="Meijinaerum" uid="336767">
+  <nd ref="1914112910"/>
+  <nd ref="1914112874"/>
+  <nd ref="1914112889"/>
+  <nd ref="1674435202"/>
+  <nd ref="1914112952"/>
+  <nd ref="1914112959"/>
+  <nd ref="1914112869"/>
+  <tag k="highway" v="footway"/>
+ </way>
+ <way id="180965116" visible="true" version="3" changeset="50184946" timestamp="2017-07-10T19:24:51Z" user="Meijinaerum" uid="336767">
+  <nd ref="4962516001"/>
+  <nd ref="1914112926"/>
+  <nd ref="1914112956"/>
+  <nd ref="1914112943"/>
+  <nd ref="1914112870"/>
+  <nd ref="1914112960"/>
+  <tag k="highway" v="footway"/>
+ </way>
+ <way id="180965134" visible="true" version="2" changeset="50184946" timestamp="2017-07-10T19:24:51Z" user="Meijinaerum" uid="336767">
+  <nd ref="1914112931"/>
+  <nd ref="1914112866"/>
+  <nd ref="1914112927"/>
+  <nd ref="1914113001"/>
+  <nd ref="1914112956"/>
+  <tag k="highway" v="footway"/>
+ </way>
+ <way id="404645289" visible="true" version="7" changeset="63014650" timestamp="2018-09-28T16:32:46Z" user="jermig" uid="3195570">
+  <nd ref="749779800"/>
+  <nd ref="1497793282"/>
+  <nd ref="1674435185"/>
+  <nd ref="1674435209"/>
+  <nd ref="288038667"/>
+  <nd ref="5937145703"/>
+  <nd ref="288038666"/>
+  <nd ref="1674435220"/>
+  <nd ref="1674435221"/>
+  <nd ref="1674435222"/>
+  <nd ref="1674435229"/>
+  <nd ref="4962516041"/>
+  <nd ref="288038577"/>
+  <tag k="highway" v="residential"/>
+  <tag k="lit" v="yes"/>
+  <tag k="maxspeed" v="30"/>
+  <tag k="name" v="Podedworze"/>
+  <tag k="sidewalk" v="left"/>
+  <tag k="source:maxspeed" v="PL:zone30"/>
+  <tag k="surface" v="asphalt"/>
+ </way>
+ <way id="506534196" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:43Z" user="Meijinaerum" uid="336767">
+  <nd ref="1914113001"/>
+  <nd ref="1674435217"/>
+  <tag k="highway" v="footway"/>
+ </way>
+ <way id="506534197" visible="true" version="1" changeset="50184946" timestamp="2017-07-10T19:24:43Z" user="Meijinaerum" uid="336767">
+  <nd ref="1914112926"/>
+  <nd ref="4962515998"/>
+  <tag k="highway" v="footway"/>
+ </way>
+ <way id="506534200" visible="true" version="3" changeset="65690444" timestamp="2018-12-22T11:06:07Z" user="Sparrowbe" uid="2061097">
+  <nd ref="1497793866"/>
+  <nd ref="4962516032"/>
+  <nd ref="4962516031"/>
+  <nd ref="4962516030"/>
+  <nd ref="4962516029"/>
+  <nd ref="4962516026"/>
+  <nd ref="4962516028"/>
+  <nd ref="4962516025"/>
+  <nd ref="4962515998"/>
+  <nd ref="4962515999"/>
+  <nd ref="4962516000"/>
+  <tag k="highway" v="footway"/>
+  <tag k="lit" v="yes"/>
+  <tag k="surface" v="paving_stones"/>
+ </way>
+</osm>

@@ -1,4 +1,4 @@
-from Utilities import visualize, rays2dcalculator
+from utilities import visualize, rays2dcalculator
 
 print("Calculate Top Rays")
 xSize = 20  # nuberic size of in eg metres

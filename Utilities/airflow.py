@@ -1,5 +1,5 @@
 import numpy as np
-from Utilities import visualize, rays2dcalculator
+from utilities import visualize, rays2dcalculator
 
 
 class AirFlow:

@@ -1,4 +1,4 @@
-from Utilities import visualize, airflow
+from utilities import visualize, airflow
 
 print("FFC:", "Start simulation")
 
