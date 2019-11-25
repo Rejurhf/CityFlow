@@ -7,8 +7,8 @@ gridCreator = gridcreator.GridCreator("resources/map2.osm")
 
 # get grid elements
 xSize, ySize, zSize = gridCreator.getGridElements()
-densPerMeter = 1
-obstacleList = [[6, 3, 8, 4, 0, 4]]
+densPerMeter = 0.5
+obstacleList = gridCreator.buildingList
 
 print("FFOMS:", "xSize: {}, ySize: {}, zSize: {}".format(xSize, ySize, zSize))
 print("FFOMS:", "Density per meter:", densPerMeter)
@@ -24,8 +24,8 @@ flow.calculateFlow()
 print("FFC:", "Show Top View")
 flow.getTopViewLayerForMeter(2)
 
-# Get side view for 10m from left
-print("FFC:", "Show Side View")
-flow.getSideViewLayerForMeter(10)
+# # Get side view for 10m from left
+# print("FFC:", "Show Side View")
+# flow.getSideViewLayerForMeter(10)
 
 

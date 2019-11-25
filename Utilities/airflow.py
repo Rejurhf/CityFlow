@@ -26,16 +26,11 @@ class AirFlow:
     obstacleList2d = []
     if isTopView:
       for obstacle in self.obstacleList:
-        obstZStartLayer = int(obstacle[4] * self.densPerMeter)
-        obstZEndLayer = int((obstacle[4]+obstacle[5]) * self.densPerMeter)
-        if obstZStartLayer <= layer <= obstZEndLayer:
-          obstacleList2d.append([obstacle[0], obstacle[1], obstacle[2], obstacle[3]])
+        if obstacle["height"] >= layer:
+          obstacleList2d.append(obstacle)
     else:
       for obstacle in self.obstacleList:
-        obstYStartLayer = int(obstacle[2] * self.densPerMeter)
-        obstYEndLayer = int((obstacle[2]+obstacle[3]) * self.densPerMeter)
-        if obstYStartLayer <= layer <= obstYEndLayer:
-          obstacleList2d.append([obstacle[0], obstacle[1], obstacle[4], obstacle[5]])
+        print("Side obstacles TODO")
     
     return obstacleList2d
 
@@ -72,9 +67,12 @@ class AirFlow:
   # Calculate flow -----------------------------------------------------------------------
   def calculateFlow(self):
     # Simulate top layers
+    print("calculateFlow top")
     for i in range(self.nz):
-      # Get obstacles for layer
-      obstaclesForLayer = self.convertObstaclesTo2d(i)
+      # Get obstacles for top layer
+      obstaclesForLayer = []
+      if not isinstance(self.obstacleList[0], dict):
+        obstaclesForLayer = self.convertObstaclesTo2d(i)
       # Simulate layer
       topView = rays2dcalculator.Rays2dCalculator(self.xSize, self.ySize, 
         self.densPerMeter, obstaclesForLayer)
@@ -84,8 +82,11 @@ class AirFlow:
     print("AF:", "Top view calculated")
 
     # Simulate side layers
+    print("calculateFlow side")
     for i in range(self.ny):
-      obstaclesForLayer = self.convertObstaclesTo2d(i, isTopView=False)
+      obstaclesForLayer = []
+      if not isinstance(self.obstacleList[0], dict):
+        obstaclesForLayer = self.convertObstaclesTo2d(i, isTopView=False)
       sideView = rays2dcalculator.Rays2dCalculator(self.xSize, self.zSize,
         self.densPerMeter, obstaclesForLayer)
       X, Z, x, z, pt = sideView.getFlowPathSideArray()
@@ -114,7 +115,8 @@ class AirFlow:
     array2dX = self.vX[zLayer]  # Get layers
     array2dY = self.vY[zLayer]
     array2dP = self.p[zLayer]
-    listOf2dObstacles = self.convertObstaclesTo2d(zLayer, isTopView = True)
+
+    listOf2dObstacles = self.convertObstaclesTo2d(meterAboveGround, isTopView = True)
 
     # Print text and display plot
     titleText = "{}m above ground ({} Z axis layer)".format(meterAboveGround, zLayer+1)
@@ -134,7 +136,12 @@ class AirFlow:
     array2dX = self.getSideView2dArray(self.vX, yLayer) # Get layers
     array2dZ = self.getSideView2dArray(self.vZ, yLayer)
     array2dP = self.getSideView2dArray(self.p, yLayer)
-    listOf2dObstacles = self.convertObstaclesTo2d(yLayer, isTopView = False)
+
+    listOf2dObstacles = []
+    if isinstance(self.obstacleList[0], dict):
+      print("getSideViewLayerForMeter")
+    else:
+      listOf2dObstacles = self.convertObstaclesTo2d(yLayer, isTopView = False)
     
     # Print text and display plot
     titleText = "{}m from left ({} Y axis layer)".format(meterFromY0, yLayer+1)

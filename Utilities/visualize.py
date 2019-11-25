@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+from shapely.geometry.polygon import Polygon
+from descartes import PolygonPatch
 import numpy as np
 
 def showPlot(X, Y, u, v, p, obstacles, titleText="no text"):
@@ -11,10 +13,11 @@ def showPlot(X, Y, u, v, p, obstacles, titleText="no text"):
     plt.contour(X, Y, p)
     M = np.hypot(u, v)
     plt.quiver(X, Y, u, v, M, scale=1 / 0.02)  ##plotting velocity
-    # plt.scatter(X, Y, color='r')
-    for obstacle in obstacles:
-        plt.broken_barh([(obstacle[0], obstacle[1])], (obstacle[2], obstacle[3]), 
-            facecolors='grey', alpha=0.8)
+    for obs in obstacles:
+        ring_mixed = Polygon(obs["coordinates"])
+        ax = fig.add_subplot(111)
+        ring_patch = PolygonPatch(ring_mixed)
+        ax.add_patch(ring_patch)     
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.title(titleText, fontsize=80)
