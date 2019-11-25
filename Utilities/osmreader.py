@@ -14,7 +14,7 @@ class OSMReader(osmium.SimpleHandler):
       "building_levels": elem.tags.get("building:levels"),
       "roof": elem.tags.get("roof:shape"),
       "roof_levels": elem.tags.get("roof:levels"),
-      "nodes": list(set([node.ref for node in elem.nodes])),
+      "nodes": [node.ref for node in elem.nodes],
     }
     self.buildingList.append(tmpDict)
 
@@ -33,14 +33,3 @@ class OSMReader(osmium.SimpleHandler):
   def way(self, w):
     if "building" in w.tags:
       self.addToBuildingList(w, "way")
-
-  def relation(self, r):
-    print("tak")
-
-  def area(self, a):
-    print("area")
-    print(self)
-    # print(a)
-
-  def changeset(self, o):
-    print("normalize")

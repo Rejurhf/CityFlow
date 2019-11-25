@@ -1,10 +1,10 @@
-from utilities import osmreader
+from utilities import gridcreator
 
 print("FFOMS:", "Read OSM file")
 
-osm = osmreader.OSMReader() # Declare OSMReader
-osm.apply_file("resources/map2.osm")  # Connect to osm file
+gridCreator = gridcreator.GridCreator("resources/map2.osm")
 
-# print("Building list:\n", osm.buildingList)
-# print("Node list:\n", osm.nodeList)
-print("Nodes:", len(osm.nodeList), "Buildings:", len(osm.buildingList))
+xSize, ySize, zSize = gridCreator.getGridElements()
+
+print("FFOMS:", "xSize: {}, ySize: {}, zSize: {}".format(xSize, ySize, zSize))
+print("FFOMS:", "Buildings: {}".format(gridCreator.buildingListSize()))
