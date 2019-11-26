@@ -5,28 +5,42 @@ from shapely.geometry.polygon import Polygon
 
 
 class Rays2dCalculator:  
-  def __init__(self, xSize, ySize, densPerMeter, obstacleList):
+  def __init__(self, xSize, ySize, layerIndicator, densPerMeter, obstacleList, isTopView = True):
+    # Max size of array in metres
     self.xSize = xSize
     self.ySize = ySize
+    # Current layer of array top/side
+    self.layerIndicator = layerIndicator
+    # Point density per meter
     self.densPerMeter = densPerMeter
-    # self.obstacleList = obstacleList
+    # List of buildings
     self.obstacleList = obstacleList
+    # Flag is top view
+    self.isTopView = isTopView
+
+  # Main function ---------------------------------------------------------------------------
+  def getFlowPathArray(self):
+    if self.isTopView:
+      return self.getFlowPathTopArray()
+    else:
+      return self.getFlowPathSideArray()
 
 
   # Is point in obstacle check ---------------------------------------------------------
   def isPointInObstacle(self, point):
     for obstacle in self.obstacleList:
+      # convert layer number to metres, create the point and polygon 
       tmpPoint = Point(point[0]/self.densPerMeter, point[1]/self.densPerMeter)
       polygon = Polygon(obstacle["coordinates"])
 
-      if polygon.contains(tmpPoint):
-        print(point)
+      # If in obstacle (check height) return True
+      if polygon.contains(tmpPoint) and self.layerIndicator/self.densPerMeter <= obstacle["height"]:
         return True
     return False
 
 
   # Get shortest route for top array ---------------------------------------------------
-  def getShortestRoute(self, pointPos, isSideArray = False):
+  def getShortestRoute(self, pointPos):
     # declare start moving point, and empty positions lists
     upPosX = pointPos[0]
     upPosY = pointPos[1] + 1
@@ -57,7 +71,7 @@ class Rays2dCalculator:
         downPosX -= 1
 
       # Condition to avoid going under the building
-      if downPosY < 0 and isSideArray:
+      if downPosY < 0 and not self.isTopView:
         return upPosX, upPosY, upVisitedList
 
     # get shorter route and return
@@ -228,7 +242,7 @@ class Rays2dCalculator:
 
           # get shortest route to move further
           posX, posY, subVisitedList = self.getShortestRoute(
-            (posX, posY), isSideArray=True)
+            (posX, posY))
           visitedPoints.extend(subVisitedList)
         elif self.isPointInObstacle((posX+1, posY)) and \
             not self.isPointInObstacle((posX, posY + 1)):

@@ -21,11 +21,13 @@ print("FFC:", "Start simulation")
 flow.calculateFlow()
 
 # Get top view for 2m above ground
-print("FFC:", "Show Top View")
-flow.getTopViewLayerForMeter(2)
+# print("FFC:", "Show Top View")
+# flow.getTopViewLayerForMeter(2)
 
 # # Get side view for 10m from left
-# print("FFC:", "Show Side View")
-# flow.getSideViewLayerForMeter(10)
+print("FFC:", "Show Side View")
+flow.getSideViewLayerForMeter(30)
+
+print("Simulation Done")
 
 

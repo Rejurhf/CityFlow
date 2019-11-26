@@ -3,7 +3,7 @@ from shapely.geometry.polygon import Polygon
 from descartes import PolygonPatch
 import numpy as np
 
-def showPlot(X, Y, u, v, p, obstacles, titleText="no text"):
+def showPlot(X, Y, u, v, p, obstacles, titleText="no text", isTopView=True):
     # Plot the last figure on screen
     fig = plt.figure(figsize=(60, 30), dpi=25)
     plt.contourf(X, Y, p, alpha=0.5)  # alpha - background intensity
@@ -14,6 +14,7 @@ def showPlot(X, Y, u, v, p, obstacles, titleText="no text"):
     M = np.hypot(u, v)
     plt.quiver(X, Y, u, v, M, scale=1 / 0.02)  ##plotting velocity
     for obs in obstacles:
+        print("V:", obs["coordinates"])
         ring_mixed = Polygon(obs["coordinates"])
         ax = fig.add_subplot(111)
         ring_patch = PolygonPatch(ring_mixed)

@@ -30,8 +30,50 @@ class AirFlow:
           obstacleList2d.append(obstacle)
     else:
       for obstacle in self.obstacleList:
-        print("Side obstacles TODO")
-    
+        # Convert layer number to metres
+        layerMeter = layer / self.densPerMeter
+
+        # tmp list of crossingPoints
+        crossingPoints = []
+
+        # go trough every point and find if line of layer crosse it
+        for i in range(len(obstacle["coordinates"])-1):
+          if obstacle["coordinates"][i][1] <= layerMeter <= obstacle["coordinates"][i+1][1] or \
+              obstacle["coordinates"][i][1] >= layerMeter >= obstacle["coordinates"][i+1][1]:
+            # Tmp auxiliary variables A-first point, B=second point
+            xA = obstacle["coordinates"][i][0]
+            yA = obstacle["coordinates"][i][1]
+            xB = obstacle["coordinates"][i+1][0]
+            yB = obstacle["coordinates"][i+1][1]
+            
+            # Calculate crossing point X from mathematical equation
+            # avoid division by zero
+            if xB - xA == 0:
+              crossingPointX = xA
+            else:
+              a = (yB - yA)/(xB - xA)
+              crossingPointX = -(((-a*xA)+yA-layerMeter)/a)
+
+            # Add point to crossing points list
+            crossingPoints.append(crossingPointX)
+        
+        # add buildings to obstacle list using crossing points, 
+        # if more than 2 points add as separate buildings
+        if len(crossingPoints) > 1:
+          for i in range(0, len(crossingPoints), 2):
+            tmpDict = {
+              "name": obstacle["name"],
+              "height": obstacle["height"],
+              "coordinates": [(crossingPoints[i+1], 0), (crossingPoints[i], 0), 
+                (crossingPoints[i], obstacle["height"]), (crossingPoints[i+1], obstacle["height"]), 
+                (crossingPoints[i+1], 0)],
+            }
+            obstacleList2d.append(tmpDict)
+
+            # Check if there are at least 2 more elements in the list
+            if len(crossingPoints) < i + 4:
+              break
+
     return obstacleList2d
 
 
@@ -70,10 +112,12 @@ class AirFlow:
     for i in range(self.nz):
       # Get obstacles for top layer
       obstaclesForLayer = self.convertObstaclesTo2d(i/self.densPerMeter)
+      
       # Simulate layer
-      topView = rays2dcalculator.Rays2dCalculator(self.xSize, self.ySize, 
+      topView = rays2dcalculator.Rays2dCalculator(self.xSize, self.ySize, i,
         self.densPerMeter, obstaclesForLayer)
-      X, Y, x, y, pt = topView.getFlowPathTopArray()
+      X, Y, x, y, pt = topView.getFlowPathArray()
+      
       # Copy layer top 3d array
       self.copyLayerTo3DArray(x, y, i)
     print("AF:", "Top view calculated")
@@ -84,13 +128,14 @@ class AirFlow:
       obstaclesForLayer = []
       if not isinstance(self.obstacleList[0], dict):
         obstaclesForLayer = self.convertObstaclesTo2d(i, isTopView=False)
-      sideView = rays2dcalculator.Rays2dCalculator(self.xSize, self.zSize,
+      
+      sideView = rays2dcalculator.Rays2dCalculator(self.xSize, self.zSize, i,
         self.densPerMeter, obstaclesForLayer)
       X, Z, x, z, pt = sideView.getFlowPathSideArray()
+      
       self.copyLayerTo3DArray(x, z, i, isTopView=False)
     print("AF:", "Side view calculated")
     
-
     # Reduce duplications in vX array
     self.vX /= 2
 
@@ -113,6 +158,7 @@ class AirFlow:
     array2dY = self.vY[zLayer]
     array2dP = self.p[zLayer]
 
+    # Get only obstacles from current layer
     listOf2dObstacles = self.convertObstaclesTo2d(meterAboveGround, isTopView = True)
 
     # Print text and display plot
@@ -134,11 +180,8 @@ class AirFlow:
     array2dZ = self.getSideView2dArray(self.vZ, yLayer)
     array2dP = self.getSideView2dArray(self.p, yLayer)
 
-    listOf2dObstacles = []
-    if isinstance(self.obstacleList[0], dict):
-      print("getSideViewLayerForMeter")
-    else:
-      listOf2dObstacles = self.convertObstaclesTo2d(yLayer, isTopView = False)
+    # only obstacles from current layer
+    listOf2dObstacles = self.convertObstaclesTo2d(yLayer, isTopView = False)
     
     # Print text and display plot
     titleText = "{}m from left ({} Y axis layer)".format(meterFromY0, yLayer+1)
