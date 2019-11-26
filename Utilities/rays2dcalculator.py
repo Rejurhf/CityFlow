@@ -34,7 +34,10 @@ class Rays2dCalculator:
       polygon = Polygon(obstacle["coordinates"])
 
       # If in obstacle (check height) return True
-      if polygon.contains(tmpPoint) and self.layerIndicator/self.densPerMeter <= obstacle["height"]:
+      if self.isTopView and polygon.contains(tmpPoint) and \
+          self.layerIndicator/self.densPerMeter <= obstacle["height"]:
+        return True
+      elif not self.isTopView and polygon.contains(tmpPoint):
         return True
     return False
 
@@ -60,6 +63,9 @@ class Rays2dCalculator:
       else:
         upPosX -= 1
 
+    if not self.isTopView:
+      return upPosX, upPosY, upVisitedList
+
     # try to go down
     while downPosX == pointPos[0]:
       downVisitedList.append((downPosX, downPosY))
@@ -71,7 +77,7 @@ class Rays2dCalculator:
         downPosX -= 1
 
       # Condition to avoid going under the building
-      if downPosY < 0 and not self.isTopView:
+      if downPosY < 0 and self.isTopView:
         return upPosX, upPosY, upVisitedList
 
     # get shorter route and return
@@ -186,7 +192,10 @@ class Rays2dCalculator:
             u[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
             v[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
 
-    
+    # Comment this
+    # v = np.zeros((ny, nx))
+    # u = np.ones((ny, nx))  # for u-velocity I initialise to 1 everywhere
+
     p = np.zeros((ny, nx)) # np.add(np.absolute(u), np.absolute(v))
     p = np.add(np.absolute(u), np.absolute(v))
     # p = u
@@ -296,7 +305,10 @@ class Rays2dCalculator:
             u[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
             v[visitedPoints[i][1], visitedPoints[i][0]] += -0.5
 
-    
+    # Comment this
+    # v = np.zeros((ny, nx))
+    # u = np.ones((ny, nx))  # for u-velocity I initialise to 1 everywhere
+
     p = np.zeros((ny, nx)) # np.add(np.absolute(u), np.absolute(v))
     p = np.add(np.absolute(u), np.absolute(v))
     # p = u

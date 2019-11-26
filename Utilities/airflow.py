@@ -22,17 +22,14 @@ class AirFlow:
     self.p = np.zeros((self.nz, self.ny, self.nx))
 
   # Convert 3d obstacles to 2d
-  def convertObstaclesTo2d(self, layer, isTopView = True):
+  def convertObstaclesTo2d(self, layerMeter, isTopView = True):
     obstacleList2d = []
     if isTopView:
       for obstacle in self.obstacleList:
-        if obstacle["height"] >= layer:
+        if obstacle["height"] >= layerMeter:
           obstacleList2d.append(obstacle)
     else:
       for obstacle in self.obstacleList:
-        # Convert layer number to metres
-        layerMeter = layer / self.densPerMeter
-
         # tmp list of crossingPoints
         crossingPoints = []
 
@@ -52,7 +49,10 @@ class AirFlow:
               crossingPointX = xA
             else:
               a = (yB - yA)/(xB - xA)
-              crossingPointX = -(((-a*xA)+yA-layerMeter)/a)
+              if a == 0:
+                crossingPointX = xA
+              else:
+                crossingPointX = -(((-a*xA)+yA-layerMeter)/a)
 
             # Add point to crossing points list
             crossingPoints.append(crossingPointX)
@@ -73,7 +73,7 @@ class AirFlow:
             # Check if there are at least 2 more elements in the list
             if len(crossingPoints) < i + 4:
               break
-
+      
     return obstacleList2d
 
 
@@ -109,8 +109,9 @@ class AirFlow:
   # Calculate flow -----------------------------------------------------------------------
   def calculateFlow(self):
     # Simulate top layers
+    print("AF:", "Start calculating top view")
     for i in range(self.nz):
-      # Get obstacles for top layer
+      # Get obstacles for layer top view
       obstaclesForLayer = self.convertObstaclesTo2d(i/self.densPerMeter)
       
       # Simulate layer
@@ -120,21 +121,18 @@ class AirFlow:
       
       # Copy layer top 3d array
       self.copyLayerTo3DArray(x, y, i)
-    print("AF:", "Top view calculated")
-
+    
     # Simulate side layers
-    print("calculateFlow side")
+    print("AF:", "Start calculating side view")
     for i in range(self.ny):
-      obstaclesForLayer = []
-      if not isinstance(self.obstacleList[0], dict):
-        obstaclesForLayer = self.convertObstaclesTo2d(i, isTopView=False)
+      # get obstacles for layer side view
+      obstaclesForLayer = self.convertObstaclesTo2d(i/self.densPerMeter, isTopView=False)
       
       sideView = rays2dcalculator.Rays2dCalculator(self.xSize, self.zSize, i,
-        self.densPerMeter, obstaclesForLayer)
-      X, Z, x, z, pt = sideView.getFlowPathSideArray()
+        self.densPerMeter, obstaclesForLayer, isTopView=False)
+      X, Z, x, z, pt = sideView.getFlowPathArray()
       
       self.copyLayerTo3DArray(x, z, i, isTopView=False)
-    print("AF:", "Side view calculated")
     
     # Reduce duplications in vX array
     self.vX /= 2

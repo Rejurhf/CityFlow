@@ -8,12 +8,9 @@ def showPlot(X, Y, u, v, p, obstacles, titleText="no text", isTopView=True):
     # calculate ratio of array dimensions 
     if len(u) < len(u[0]):
         lenRatio = len(u)/len(u[0])
-        print("Big X", len(u), len(u[0]), lenRatio)
         fig = plt.figure(figsize=(60, int(lenRatio*60)), dpi=25)
     else:
         lenRatio = len(u[0])/len(u)
-        
-        print("Big Y", len(u), len(u[0]), lenRatio)
         fig = plt.figure(figsize=(int(lenRatio*60), 60), dpi=25)
 
     # fig = plt.figure(figsize=(60, 30), dpi=25)
