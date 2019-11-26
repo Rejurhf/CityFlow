@@ -67,12 +67,9 @@ class AirFlow:
   # Calculate flow -----------------------------------------------------------------------
   def calculateFlow(self):
     # Simulate top layers
-    print("calculateFlow top")
     for i in range(self.nz):
       # Get obstacles for top layer
-      obstaclesForLayer = []
-      if not isinstance(self.obstacleList[0], dict):
-        obstaclesForLayer = self.convertObstaclesTo2d(i)
+      obstaclesForLayer = self.convertObstaclesTo2d(i/self.densPerMeter)
       # Simulate layer
       topView = rays2dcalculator.Rays2dCalculator(self.xSize, self.ySize, 
         self.densPerMeter, obstaclesForLayer)

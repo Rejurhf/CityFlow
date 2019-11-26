@@ -1,43 +1,27 @@
 import numpy as np
 import math as mth
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
+
 
 class Rays2dCalculator:  
   def __init__(self, xSize, ySize, densPerMeter, obstacleList):
     self.xSize = xSize
     self.ySize = ySize
     self.densPerMeter = densPerMeter
+    # self.obstacleList = obstacleList
     self.obstacleList = obstacleList
 
 
   # Is point in obstacle check ---------------------------------------------------------
   def isPointInObstacle(self, point):
     for obstacle in self.obstacleList:
-      # Calculate obstacle borders
-      leftBorder = mth.ceil(obstacle[0] * self.densPerMeter)
-      rightBorder = mth.floor((obstacle[0] + obstacle[1]) * self.densPerMeter)
-      bottomBorder = mth.ceil(obstacle[2] * self.densPerMeter)
-      topBorder = mth.floor((obstacle[2] + obstacle[3]) * self.densPerMeter) 
+      tmpPoint = Point(point[0]/self.densPerMeter, point[1]/self.densPerMeter)
+      polygon = Polygon(obstacle["coordinates"])
 
-      # Return true if point is in obstacle else return false
-      if leftBorder <= point[0] <= rightBorder and bottomBorder <= point[1] <= topBorder:
+      if polygon.contains(tmpPoint):
+        print(point)
         return True
-    return False
-
-
-  # Is point in obstacle of Index check ------------------------------------------------
-  def isPointInObstacleOfIndex(self, point, obstacleIndex):
-    # get obstacle from obstacle list
-    curObstacle = self.obstacleList[obstacleIndex]
-
-    # Calculate obstacle borders
-    leftBorder = mth.ceil(curObstacle[0] * self.densPerMeter)
-    rightBorder = mth.floor((curObstacle[0] + curObstacle[1]) * self.densPerMeter)
-    bottomBorder = mth.ceil(curObstacle[2] * self.densPerMeter)
-    topBorder = mth.floor((curObstacle[2] + curObstacle[3]) * self.densPerMeter) 
-
-    # Return true if point is in obstacle else return false
-    if leftBorder <= point[0] <= rightBorder and bottomBorder <= point[1] <= topBorder:
-      return True
     return False
 
 
@@ -85,16 +69,6 @@ class Rays2dCalculator:
 
   # Determine target ray position ------------------------------------------------------
   def determineTarget(self, pointPos):
-    nearObsIndex = 0
-
-    # find nearest obstacle checking them one by one
-    for i in range(len(self.obstacleList)):
-      if self.isPointInObstacleOfIndex(pointPos, i):
-        nearObsIndex = i
-
-    # calculate middle of obstacle y position
-    nearObs = self.obstacleList[nearObsIndex]
-    # centerOfObstacle = int((nearObs[2] + (nearObs[3]/2)) * self.densPerMeter)
     target = pointPos[1]
     return target
 
