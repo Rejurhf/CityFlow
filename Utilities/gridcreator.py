@@ -29,7 +29,7 @@ class GridCreator:
     # Add buildings wit coordinates to building list
     self.fillBuildingsData(buildings, nodes)
 
-    return self.xSize, self.ySize, self.zSize
+    return self.xSize, self.ySize, self.zSize, self.buildingList
 
 
   # Fill building List -----------------------------------------------------------------------------
@@ -52,7 +52,7 @@ class GridCreator:
       
       # update ySize
       if (int(building["building_levels"]) * 3) > (self.zSize - 10):
-        self.zSize = (int(building["building_levels"]) * 3) + 10
+        self.zSize = (int(building["building_levels"]) * 3) + 20
 
       # Append building list with new building
       self.buildingList.append(tmpDict)
@@ -60,8 +60,8 @@ class GridCreator:
 
   # Convert lat and lon to x, y on grid
   def getXYCoordinates(self, lat, lon):
-    x = int(geodesic((self.minlat, 0), (lat, 0)).meters)
-    y = int(geodesic((0, self.minlon), (0, lon)).meters)
+    x = int(geodesic((0, self.minlon), (0, lon)).meters)
+    y = int(geodesic((self.minlat, 0), (lat, 0)).meters)
 
     return x, y 
 
@@ -85,9 +85,8 @@ class GridCreator:
   def getAreaSizeFromOSM(self):
     maxlat, maxlon = self.findBoundaries()
 
-    self.xSize = int(geodesic((self.minlat, 0), (maxlat, 0)).meters)
-    self.ySize = int(geodesic((0, self.minlon), (0, maxlon)).meters)
-
+    self.xSize = int(geodesic((0, self.minlon), (0, maxlon)).meters)
+    self.ySize = int(geodesic((self.minlat, 0), (maxlat, 0)).meters)
 
 
   def buildingListSize(self):
