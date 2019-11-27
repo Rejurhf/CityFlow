@@ -1,4 +1,4 @@
-from utilities import airflow, gridcreator
+from utilities import airflow, gridcreator, filewriter
 
 print("FFOMS:", "Read OSM file")
 
@@ -17,15 +17,25 @@ flow = airflow.AirFlow(xSize, ySize, zSize, densPerMeter, obstacleList)
 
 # Make simulation
 print("FFC:", "Start simulation")
-flow.calculateFlow()
+# flow.calculateFlow()
 
-# Get top view for 2m above ground
-print("FFC:", "Show Top View")
-flow.getTopViewLayerForMeter(2)
+# # Get top view for 2m above ground
+# print("FFC:", "Show Top View")
+# flow.getTopViewLayerForMeter(2)
 
 # # Get side view for 10m from left
-print("FFC:", "Show Side View")
-flow.getSideViewLayerForMeter(30)
+# print("FFC:", "Show Side View")
+# flow.getSideViewLayerForMeter(30)
+
+# Get flow in single array
+flowArray, pList = flow.getFlowArray()
+
+# Save array to file
+print(obstacleList)
+filewriter.writeToJSON(obstacleList, "buildings")
+
+tmp = filewriter.readFromJSON("buildings_2019-11-27T20_00_36.txt")
+print(tmp)
 
 print("Simulation Done")
 

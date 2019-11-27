@@ -1,0 +1,1 @@
+[{"name": "Podedworze 4", "height": 33, "coordinates": [[100, 49], [102, 12], [119, 12], [118, 50], [100, 49]]}, {"name": "Podedworze 2", "height": 33, "coordinates": [[21, 48], [22, 10], [40, 10], [38, 48], [21, 48]]}]

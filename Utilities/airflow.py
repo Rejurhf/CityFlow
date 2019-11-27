@@ -105,7 +105,6 @@ class AirFlow:
           self.vZ[i, layer, j] += array2[i, j]
 
 
-
   # Calculate flow -----------------------------------------------------------------------
   def calculateFlow(self):
     # Simulate top layers
@@ -185,3 +184,19 @@ class AirFlow:
     titleText = "{}m from left ({} Y axis layer)".format(meterFromY0, yLayer+1)
     print("AF:", titleText)
     visualize.showPlot(X, Z, array2dX, array2dZ, array2dP, listOf2dObstacles, titleText)
+
+
+  # Get flow in single array
+  def getFlowArray(self):
+    flowArray = []
+    print(len(self.vX), len(self.vX[0]), len(self.vX[0,0]))
+    for z in range(len(self.vX)):
+      tmpYList = []
+      for y in range(len(self.vX[0])):
+        tmpXList = []
+        for x in range(len(self.vX[0,0])):
+          tmpXList.append((self.vX[z,y,x], self.vY[z,y,x], self.vZ[z,y,x]))
+        tmpYList.append(tmpXList)
+      flowArray.append(tmpYList)
+
+    return flowArray, self.p
