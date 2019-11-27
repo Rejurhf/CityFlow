@@ -9,8 +9,6 @@ gridCreator = gridcreator.GridCreator("resources/map2.osm")
 xSize, ySize, zSize, obstacleList = gridCreator.getGridElements()
 densPerMeter = 0.5
 
-print(obstacleList)
-
 print("FFOMS:", "xSize: {}, ySize: {}, zSize: {}".format(xSize, ySize, zSize))
 print("FFOMS:", "Density per meter:", densPerMeter)
 print("FFOMS:", "Buildings: {}".format(gridCreator.buildingListSize()))
