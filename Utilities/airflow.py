@@ -202,7 +202,7 @@ class AirFlow:
     return flowArray, self.p
 
 
-  def getRaysFromFlowArray(self, inFlowArray = [], meterPerRay = 6):
+  def getRaysFromFlowArray(self, inFlowArray = [], scopeMeter = 2):
     print("AF:", "Geting Flow Rays")
     
     # check if array is passed if not get new one
@@ -218,89 +218,87 @@ class AirFlow:
     flowArrayLenZ = len(flowArray)    
     
     # Convert meterPerRay to layerPerRay  
-    layerPerRay = int(meterPerRay * self.densPerMeter)
-    if(layerPerRay < 1):
-      layerPerRay = 1
+    scope = int(scopeMeter * self.densPerMeter)
 
-    # Calculate offset if array length can not be divided by layerPerRay
-    xOffset = 0
-    yOffset = 0
-    zOffset = 0
-    tmpXLen = int(flowArrayLenX / layerPerRay)
-    tmpYLen = int(flowArrayLenY / layerPerRay)
-    tmpZLen = int(flowArrayLenZ / layerPerRay)
-    if flowArrayLenZ % layerPerRay != 0:
-      zOffset = flowArrayLenZ % layerPerRay
-      tmpZLen += 1
-    if flowArrayLenY % layerPerRay != 0:
-      yOffset = flowArrayLenY % layerPerRay
-      tmpYLen += 1
-    if flowArrayLenX % layerPerRay != 0:
-      xOffset = flowArrayLenX % layerPerRay
-      tmpXLen += 1
+    # Calculate sub arrays len if array length can not be divided by scope
+    if scope > 0:
+      tmpYLen = int(flowArrayLenY / ((scope*2)+1))
+      tmpZLen = int(flowArrayLenZ / ((scope*2)+1))
+      
+      if flowArrayLenZ % ((scope*2)+1) != 0:
+        tmpZLen += 1
     
-    # for z in range(tmpZLen):
-    #   for x in range(tmpXLen):
-    #     count +=1
+      if flowArrayLenY % ((scope*2)+1) != 0:
+        tmpYLen += 1
+    else:
+      tmpYLen = flowArrayLenY
+      tmpZLen = flowArrayLenZ
+
 
     # Calculate Ray path
-    posList = []
-    startX = 0
-    startY = 1
-    startZ = 1
-    currPos = [startX, startY, startZ]
-    scope = 1
-    while True:
-      posList.append((currPos[0], currPos[1], currPos[2]))
-      tmpValX = 0
-      tmpValY = 0
-      tmpValZ = 0
-      posCalcCount = 0
-      for z in range(-scope, scope+1):
-        for y in range(-scope, scope+1):
-          for x in range(-scope, scope+1):
-            tmpArrayX = (currPos[0] + x)
-            tmpArrayY = (currPos[1] + y)
-            tmpArrayZ = (currPos[2] + z)
+    for z in range(tmpZLen):
+      for y in range(tmpYLen):
+        posList = []
+        startX = 0
+        # TODO miejsca graniczne
+        startY = scope + (((2*scope)+1)*y)
+        startZ = scope + (((2*scope)+1)*z)
+        currPos = [startX, startY, startZ]
 
-            if tmpArrayX < 0 or tmpArrayZ < 0 or tmpArrayZ < 0 or \
-                tmpArrayX >= flowArrayLenX or tmpArrayY >= flowArrayLenY or \
-                tmpArrayZ >= flowArrayLenZ:
-              continue
+        # Start flow for ray
+        while True:
+          posList.append((currPos[0], currPos[1], currPos[2]))
+          tmpValX = 0
+          tmpValY = 0
+          tmpValZ = 0
+          posCalcCount = 0
+          for z in range(-scope, scope+1):
+            for y in range(-scope, scope+1):
+              for x in range(-scope, scope+1):
+                tmpArrayX = (currPos[0] + x)
+                tmpArrayY = (currPos[1] + y)
+                tmpArrayZ = (currPos[2] + z)
+
+                if tmpArrayX < 0 or tmpArrayZ < 0 or tmpArrayZ < 0 or \
+                    tmpArrayX >= flowArrayLenX or tmpArrayY >= flowArrayLenY or \
+                    tmpArrayZ >= flowArrayLenZ:
+                  continue
+                else:
+                  posCalcCount += 1
+                  tmpValX += flowArray[z][y][x][0]
+                  tmpValY += flowArray[z][y][x][1]
+                  tmpValZ += flowArray[z][y][x][2]
+
+          # Mean value in scope
+          tmpValX /= posCalcCount
+          tmpValY /= posCalcCount
+          tmpValZ /= posCalcCount
+
+          # Determine action
+          if tmpValX == 0 and tmpValY == 0 and tmpValZ == 0:
+            break
+          elif tmpValY == 0 and tmpValZ == 0:
+            if tmpValX > 0 and currPos[0]+1 < flowArrayLenX:
+              currPos[0] += 1
+            elif tmpValX < 0 and currPos[0]-1 >= 0:
+              currPos[0] -= 1
             else:
-              posCalcCount += 1
-              tmpValX += flowArray[z][y][x][0]
-              tmpValY += flowArray[z][y][x][1]
-              tmpValZ += flowArray[z][y][x][2]
-
-      # Mean value in scope
-      tmpValX /= posCalcCount
-      tmpValY /= posCalcCount
-      tmpValZ /= posCalcCount
-
-      # Determine action
-      if tmpValX == 0 and tmpValY == 0 and tmpValZ == 0:
+              break
+          else: 
+            break
+        
+        # Create Dict for ray
+        rayName = "Ray {}_{}_{}".format(startX, startY, startZ)
+        tmpDict = {
+          "name": rayName,
+          "x": startX,
+          "y": startY,
+          "z": startZ,
+          "layerpermeter": 1/self.densPerMeter,
+          "positions": posList,
+        }
         break
-      elif tmpValY == 0 and tmpValZ == 0:
-        if tmpValX > 0 and currPos[0]+1 < flowArrayLenX:
-          currPos[0] += 1
-        elif tmpValX < 0 and currPos[0]-1 >= 0:
-          currPos[0] -= 1
-        else:
-          break
-      else: 
-        break
-    
-    # Create Dict for ray
-    rayName = "Ray {}_{}_{}".format(startX, startY, startZ)
-    tmpDict = {
-      "name": rayName,
-      "x": startX,
-      "y": startY,
-      "z": startZ,
-      "layerpermeter": 1/self.densPerMeter,
-      "positions": posList,
-    }
+      break
 
     rayList = []
     rayList.append(tmpDict)
