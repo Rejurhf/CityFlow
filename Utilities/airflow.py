@@ -16,7 +16,7 @@ class AirFlow:
     self.nz = int(self.zSize * self.densPerMeter) + 1
 
     # Create 3d arrays
-    self.vX = np.ones((self.nz, self.ny, self.nx))
+    self.vX = np.zeros((self.nz, self.ny, self.nx))
     self.vY = np.zeros((self.nz, self.ny, self.nx))
     self.vZ = np.zeros((self.nz, self.ny, self.nx))
     self.p = np.zeros((self.nz, self.ny, self.nx))
@@ -202,7 +202,7 @@ class AirFlow:
     return flowArray, self.p
 
 
-  def getRaysFromFlowArray(self, inFlowArray = [], scopeMeter = 2):
+  def getRaysFromFlowArray(self, inFlowArray = [], scopeMeter = 4):
     print("AF:", "Geting Flow Rays")
     
     # check if array is passed if not get new one
@@ -215,7 +215,7 @@ class AirFlow:
     # Calculate constants
     flowArrayLenX = len(flowArray[0][0])
     flowArrayLenY = len(flowArray[0])
-    flowArrayLenZ = len(flowArray)    
+    flowArrayLenZ = len(flowArray)
     
     # Convert meterPerRay to layerPerRay  
     scope = int(scopeMeter * self.densPerMeter)
@@ -236,13 +236,22 @@ class AirFlow:
 
 
     # Calculate Ray path
-    for z in range(tmpZLen):
-      for y in range(tmpYLen):
+    rayList = []
+
+    for zs in range(tmpZLen):
+      for ys in range(tmpYLen):
         posList = []
         startX = 0
-        # TODO miejsca graniczne
-        startY = scope + (((2*scope)+1)*y)
-        startZ = scope + (((2*scope)+1)*z)
+        startY = scope + (((2*scope)+1)*ys)
+        startZ = scope + (((2*scope)+1)*zs)
+        
+        # Check if starting pos in array
+        if startY >= flowArrayLenY:
+          startY = flowArrayLenY - 1
+        if startZ >= flowArrayLenZ:
+          startZ = flowArrayLenZ - 1 
+
+
         currPos = [startX, startY, startZ]
 
         # Start flow for ray
@@ -277,18 +286,18 @@ class AirFlow:
           # Determine action
           if tmpValX == 0 and tmpValY == 0 and tmpValZ == 0:
             break
-          elif tmpValY == 0 and tmpValZ == 0:
-            if tmpValX > 0 and currPos[0]+1 < flowArrayLenX:
-              currPos[0] += 1
-            elif tmpValX < 0 and currPos[0]-1 >= 0:
-              currPos[0] -= 1
-            else:
-              break
-          else: 
+
+          newPos = self.determineNextRayPosition(tmpValX, tmpValY, tmpValZ, currPos)
+          
+          if newPos[0] > flowArrayLenX or newPos[0] < 0 or newPos[1] > flowArrayLenY or \
+              newPos[1] < 0 or newPos[2] > flowArrayLenZ or newPos[2] < 0:
             break
+          
+          # TODO sprawdzenie czy dana pozycja jest już na liście
+          currPos = newPos
         
         # Create Dict for ray
-        rayName = "Ray {}_{}_{}".format(startX, startY, startZ)
+        rayName = "Ray {}_{}_{}|{}".format(startX, startY, startZ, len(posList))
         tmpDict = {
           "name": rayName,
           "x": startX,
@@ -297,10 +306,74 @@ class AirFlow:
           "layerpermeter": 1/self.densPerMeter,
           "positions": posList,
         }
-        break
-      break
-
-    rayList = []
-    rayList.append(tmpDict)
-    # TODO zmienić ones na zeroz w __init__
+        rayList.append(tmpDict)
+    
     return rayList
+
+  # Determine new position of ray using values from previous position ----------------------------
+  def determineNextRayPosition(self, valX, valY, valZ, currPos):
+    # create new pos
+    newPos = currPos
+
+    # if valX the bigest add 1 to x and check if others should be added
+    if abs(valX) > abs(valY) and abs(valX) > abs(valZ):
+      # Move in x pos
+      if valX > 0:
+        newPos[0] += 1
+      else:
+        newPos[0] -= 1
+
+      # check if move in y
+      if abs(valY) >= abs(valX)/2:
+        if valY > 0:
+          newPos[1] += 1
+        else:
+          newPos[1] -= 1
+      
+      # check if move in z
+      if abs(valZ) >= abs(valX)/2:
+        if valZ > 0:
+          newPos[2] += 1
+        else:
+          newPos[2] -= 1
+    elif abs(valY) > abs(valX) and abs(valY) > abs(valZ):
+      # Move in Y pos
+      if valY > 0:
+        newPos[1] += 1
+      else:
+        newPos[1] -= 1
+
+      # check if move in XS
+      if abs(valX) >= abs(valY)/2:
+        if valX > 0:
+          newPos[0] += 1
+        else:
+          newPos[0] -= 1
+      
+      # check if move in z
+      if abs(valZ) >= abs(valY)/2:
+        if valZ > 0:
+          newPos[2] += 1
+        else:
+          newPos[2] -= 1
+    else:
+      # Move in Z pos
+      if valZ > 0:
+        newPos[2] += 1
+      else:
+        newPos[2] -= 1
+
+      # check if move in X
+      if abs(valX) >= abs(valZ)/2:
+        if valX > 0:
+          newPos[0] += 1
+        else:
+          newPos[0] -= 1
+      
+      # check if move in z
+      if abs(valY) >= abs(valZ)/2:
+        if valY > 0:
+          newPos[1] += 1
+        else:
+          newPos[1] -= 1
+    return newPos
