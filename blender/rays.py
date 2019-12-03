@@ -1,66 +1,95 @@
 import bpy
 import bmesh
+import json
 import math
 import mathutils
 from mathutils import Vector
 
-# Make a new BMesh
-bm = bmesh.new()
+# Open buildings file
+with open("D:\\Documents\\Studia\\Inzynierka\\CityFlow\\blender\\rays_191203T084541.txt") as inFile:
+    rayList = json.load(inFile)
 
-# Add a circle XXX, should return all geometry created, not just verts.
-bmesh.ops.create_circle(
-    bm,
-    cap_ends=False,
-    radius=0.5,
-    segments=8)
-
-# Rotate
-bmesh.ops.rotate(bm, 
-    verts=bm.verts, 
-    cent=(0.0, 0.0, 0.0), 
-    matrix=mathutils.Matrix.Rotation(math.radians(90.0), 3, 'Y'))
-
-# Generate bottom mesh
-bottom = bm.faces.new(bm.verts)
-# Stretch figure to top mesh
-top = bmesh.ops.extrude_face_region(bm, geom=[bottom])
-
-bmesh.ops.translate(bm, vec=Vector((1,0,0)), verts=[v for v in top["geom"] if isinstance(v,bmesh.types.BMVert)])
-
-#bm.normal_update()
-bm.faces.ensure_lookup_table()
-face = [bm.faces[1]]
-
-top1 = bmesh.ops.extrude_face_region(bm, geom=face)
-
-bmesh.ops.translate(bm, vec=Vector((1,1,0)), verts=[v for v in top1["geom"] if isinstance(v,bmesh.types.BMVert)])
-
-bm.faces.ensure_lookup_table()
-face = [bm.faces[10]]
-top2 = bmesh.ops.extrude_face_region(bm, geom=face)
-
-bmesh.ops.translate(bm, vec=Vector((1,1,1)), verts=[v for v in top2["geom"] if isinstance(v,bmesh.types.BMVert)])
+# Create new collection
+rayCollection = bpy.data.collections.new(name="Rays")
+# Add collection to scene
+bpy.context.scene.collection.children.link(rayCollection)
 
 
-bm.faces.ensure_lookup_table()
-face = [bm.faces[19]]
-top3 = bmesh.ops.extrude_face_region(bm, geom=face)
+for ray in rayList:
+    name = ray["name"]
+    startX = ray["x"]
+    startY = ray["y"]
+    startZ = ray["z"]
+    multiplayer = ray["layerpermeter"]
+    positions = ray["positions"]
+    print(name)
+    
+    # Make a new BMesh
+    bm = bmesh.new()
 
-bmesh.ops.translate(bm, vec=Vector((1,0,1)), verts=[v for v in top3["geom"] if isinstance(v,bmesh.types.BMVert)])
+    # Add a circle XXX, should return all geometry created, not just verts.
+    segmentsNumber = 8   
+    bmesh.ops.create_circle(
+        bm,
+        cap_ends=False,
+        radius=0.5,
+        segments=segmentsNumber)
 
+    # Rotate
+    bmesh.ops.rotate(bm, 
+        verts=bm.verts, 
+        cent=(0.0, 0.0, 0.0), 
+        matrix=mathutils.Matrix.Rotation(math.radians(90.0), 3, 'Y'))
 
-bm.normal_update()
+    # Move circle
+    bmesh.ops.translate(bm,
+        verts=bm.verts,
+        vec=(startX,startY,startZ))
 
-# Finish up, write the bmesh into a new mesh
-me = bpy.data.meshes.new("Mesh")
-bm.to_mesh(me)
-bm.free()
+    # Make translations   
+    flagSkipFirst = True
+    prevPos = [0,0,0]
+    faceNumber = 0
+    
+    # Generate bottom mesh
+    bottom = bm.faces.new(bm.verts)
+    
+    # Start translations
+    for curPos in positions:
+        if flagSkipFirst:
+            flagSkipFirst = False
+            prevPos = curPos
+            continue
 
+        bm.faces.ensure_lookup_table()
+        face = [bm.faces[faceNumber]]
 
-# Add the mesh to the scene
-obj = bpy.data.objects.new("Object", me)
-bpy.context.collection.objects.link(obj)
+        newFace = bmesh.ops.extrude_face_region(bm, geom=face)
 
-# Select and make active
-bpy.context.view_layer.objects.active = obj
-obj.select_set(True)
+        x = (curPos[0] - prevPos[0]) * multiplayer
+        y = (curPos[1] - prevPos[1]) * multiplayer
+        z = (curPos[2] - prevPos[2]) * multiplayer
+        
+        bmesh.ops.translate(bm, 
+            vec=Vector((x,y,z)), 
+            verts=[v for v in newFace["geom"] if isinstance(v,bmesh.types.BMVert)])
+            
+        if faceNumber == 0:
+            facenumber = 1
+        else:
+            facenumber += (segmentsNumber + 1)
+
+    bm.normal_update()
+
+    # Finish up, write the bmesh into a new mesh
+    me = bpy.data.meshes.new("Mesh")
+    bm.to_mesh(me)
+    bm.free()
+
+    # Add the mesh to the scene
+    obj = bpy.data.objects.new(name, me)
+    
+    # Add to ray collection   
+    obj.instance_collection = rayCollection
+    rayCollection.objects.link(obj)
+#    bpy.context.collection.objects.link(obj)

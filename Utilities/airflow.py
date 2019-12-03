@@ -298,6 +298,7 @@ class AirFlow:
       "x": startX,
       "y": startY,
       "z": startZ,
+      "layerpermeter": 1/self.densPerMeter,
       "positions": posList,
     }
 
