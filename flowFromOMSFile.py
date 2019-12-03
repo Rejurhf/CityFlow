@@ -31,11 +31,11 @@ print("FFC:", "Start simulation")
 flowArray, pList = flow.getFlowArray()
 
 # Save array to file
-print(obstacleList)
-filewriter.writeToJSON(obstacleList, "buildings")
+# filewriter.writeToJSON(obstacleList, "buildings")
 
-tmp = filewriter.readFromJSON("buildings_2019-11-27T20_00_36.txt")
-print(tmp)
+# Get ray list and save it to file
+rayList = flow.getRaysFromFlowArray()
+filewriter.writeToJSON(rayList, "rays")
 
 print("Simulation Done")
 

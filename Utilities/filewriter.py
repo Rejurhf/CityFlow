@@ -10,7 +10,7 @@ def write3dArrayToFile(array3d):
   print("FW:", "Array saved to {}".format(outFileName))
 
 
-def writeToJSON(data, fileName):
+def writeToJSON(data, fileName = "unknown"):
   now = datetime.now()
   outFileName = "{}_{}T{}.txt".format(fileName, now.strftime("%y%m%d"), now.strftime("%H%M%S"))
 

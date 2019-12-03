@@ -16,7 +16,7 @@ class AirFlow:
     self.nz = int(self.zSize * self.densPerMeter) + 1
 
     # Create 3d arrays
-    self.vX = np.zeros((self.nz, self.ny, self.nx))
+    self.vX = np.ones((self.nz, self.ny, self.nx))
     self.vY = np.zeros((self.nz, self.ny, self.nx))
     self.vZ = np.zeros((self.nz, self.ny, self.nx))
     self.p = np.zeros((self.nz, self.ny, self.nx))
@@ -189,7 +189,7 @@ class AirFlow:
   # Get flow in single array
   def getFlowArray(self):
     flowArray = []
-    print(len(self.vX), len(self.vX[0]), len(self.vX[0,0]))
+    
     for z in range(len(self.vX)):
       tmpYList = []
       for y in range(len(self.vX[0])):
@@ -200,3 +200,108 @@ class AirFlow:
       flowArray.append(tmpYList)
 
     return flowArray, self.p
+
+
+  def getRaysFromFlowArray(self, inFlowArray = [], meterPerRay = 6):
+    print("AF:", "Geting Flow Rays")
+    
+    # check if array is passed if not get new one
+    if not inFlowArray:
+      flowArray, p = self.getFlowArray()
+      del p
+    else:
+      flowArray = inFlowArray
+
+    # Calculate constants
+    flowArrayLenX = len(flowArray[0][0])
+    flowArrayLenY = len(flowArray[0])
+    flowArrayLenZ = len(flowArray)    
+    
+    # Convert meterPerRay to layerPerRay  
+    layerPerRay = int(meterPerRay * self.densPerMeter)
+    if(layerPerRay < 1):
+      layerPerRay = 1
+
+    # Calculate offset if array length can not be divided by layerPerRay
+    xOffset = 0
+    yOffset = 0
+    zOffset = 0
+    tmpXLen = int(flowArrayLenX / layerPerRay)
+    tmpYLen = int(flowArrayLenY / layerPerRay)
+    tmpZLen = int(flowArrayLenZ / layerPerRay)
+    if flowArrayLenZ % layerPerRay != 0:
+      zOffset = flowArrayLenZ % layerPerRay
+      tmpZLen += 1
+    if flowArrayLenY % layerPerRay != 0:
+      yOffset = flowArrayLenY % layerPerRay
+      tmpYLen += 1
+    if flowArrayLenX % layerPerRay != 0:
+      xOffset = flowArrayLenX % layerPerRay
+      tmpXLen += 1
+    
+    # for z in range(tmpZLen):
+    #   for x in range(tmpXLen):
+    #     count +=1
+
+    # Calculate Ray path
+    posList = []
+    startX = 0
+    startY = 1
+    startZ = 1
+    currPos = [startX, startY, startZ]
+    scope = 1
+    while True:
+      posList.append((currPos[0], currPos[1], currPos[2]))
+      tmpValX = 0
+      tmpValY = 0
+      tmpValZ = 0
+      posCalcCount = 0
+      for z in range(-scope, scope+1):
+        for y in range(-scope, scope+1):
+          for x in range(-scope, scope+1):
+            tmpArrayX = (currPos[0] + x)
+            tmpArrayY = (currPos[1] + y)
+            tmpArrayZ = (currPos[2] + z)
+
+            if tmpArrayX < 0 or tmpArrayZ < 0 or tmpArrayZ < 0 or \
+                tmpArrayX >= flowArrayLenX or tmpArrayY >= flowArrayLenY or \
+                tmpArrayZ >= flowArrayLenZ:
+              continue
+            else:
+              posCalcCount += 1
+              tmpValX += flowArray[z][y][x][0]
+              tmpValY += flowArray[z][y][x][1]
+              tmpValZ += flowArray[z][y][x][2]
+
+      # Mean value in scope
+      tmpValX /= posCalcCount
+      tmpValY /= posCalcCount
+      tmpValZ /= posCalcCount
+
+      # Determine action
+      if tmpValX == 0 and tmpValY == 0 and tmpValZ == 0:
+        break
+      elif tmpValY == 0 and tmpValZ == 0:
+        if tmpValX > 0 and currPos[0]+1 < flowArrayLenX:
+          currPos[0] += 1
+        elif tmpValX < 0 and currPos[0]-1 >= 0:
+          currPos[0] -= 1
+        else:
+          break
+      else: 
+        break
+    
+    # Create Dict for ray
+    rayName = "Ray {}_{}_{}".format(startX, startY, startZ)
+    tmpDict = {
+      "name": rayName,
+      "x": startX,
+      "y": startY,
+      "z": startZ,
+      "positions": posList,
+    }
+
+    rayList = []
+    rayList.append(tmpDict)
+    # TODO zmienić ones na zeroz w __init__
+    return rayList
