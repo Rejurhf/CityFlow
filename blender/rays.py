@@ -11,7 +11,7 @@ bm = bmesh.new()
 bmesh.ops.create_circle(
     bm,
     cap_ends=False,
-    radius=0.2,
+    radius=0.5,
     segments=8)
 
 # Rotate
