@@ -6,7 +6,7 @@ import mathutils
 from mathutils import Vector
 
 # Open buildings file
-with open("D:\\Documents\\Studia\\Inzynierka\\CityFlow\\blender\\rays_191203T084541.txt") as inFile:
+with open("D:\\Documents\\Studia\\Inzynierka\\CityFlow\\blender\\rays_191204T055656.txt") as inFile:
     rayList = json.load(inFile)
 
 # Create new collection
@@ -22,7 +22,6 @@ for ray in rayList:
     startZ = ray["z"]
     multiplayer = ray["layerpermeter"]
     positions = ray["positions"]
-    print(name)
     
     # Make a new BMesh
     bm = bmesh.new()
@@ -44,7 +43,7 @@ for ray in rayList:
     # Move circle
     bmesh.ops.translate(bm,
         verts=bm.verts,
-        vec=(startX,startY,startZ))
+        vec=(startX*multiplayer,startY*multiplayer,startZ*multiplayer))
 
     # Make translations   
     flagSkipFirst = True
@@ -66,18 +65,22 @@ for ray in rayList:
 
         newFace = bmesh.ops.extrude_face_region(bm, geom=face)
 
+        # Calculate translation vector       
         x = (curPos[0] - prevPos[0]) * multiplayer
         y = (curPos[1] - prevPos[1]) * multiplayer
         z = (curPos[2] - prevPos[2]) * multiplayer
+        
+        # reassign position
+        prevPos = curPos       
         
         bmesh.ops.translate(bm, 
             vec=Vector((x,y,z)), 
             verts=[v for v in newFace["geom"] if isinstance(v,bmesh.types.BMVert)])
             
         if faceNumber == 0:
-            facenumber = 1
+            faceNumber = 1
         else:
-            facenumber += (segmentsNumber + 1)
+            faceNumber += (segmentsNumber + 1)
 
     bm.normal_update()
 

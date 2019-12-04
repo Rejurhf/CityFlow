@@ -105,7 +105,6 @@ class Rays2dCalculator:
     v = np.zeros((ny, nx))
     u = np.zeros((ny, nx))  # for u-velocity I initialise to 1 everywhere
 
-    
     for ray in range(ny):
       visitedPoints = []
       
@@ -114,7 +113,7 @@ class Rays2dCalculator:
       posY = ray
       targetY = -1
 
-      while posX < nx and 0 <= posY <= ny:
+      while posX < nx and 0 <= posY < ny and (posX, posY) not in visitedPoints:
         visitedPoints.append((posX, posY))
 
         # Determine action

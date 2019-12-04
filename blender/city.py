@@ -3,7 +3,7 @@ from math import *
 from mathutils import Vector
 
 # Open buildings file
-with open("D:\\Documents\\Studia\\Inzynierka\\CityFlow\\blender\\buildings_191127T200825.txt") as inFile:
+with open("D:\\Documents\\Studia\\Inzynierka\\CityFlow\\blender\\buildings_191204T063637.txt") as inFile:
     buildingList = json.load(inFile)
 
 # Create new collection

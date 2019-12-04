@@ -52,7 +52,7 @@ class GridCreator:
       
       # update ySize
       if (int(building["building_levels"]) * 3) > (self.zSize - 10):
-        self.zSize = (int(building["building_levels"]) * 3) + 20
+        self.zSize = (int(building["building_levels"]) * 3) + 30
 
       # Append building list with new building
       self.buildingList.append(tmpDict)

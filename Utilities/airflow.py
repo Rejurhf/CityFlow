@@ -109,7 +109,11 @@ class AirFlow:
   def calculateFlow(self):
     # Simulate top layers
     print("AF:", "Start calculating top view")
+    counter = 0.1
     for i in range(self.nz):
+      if i/self.nz>=counter:
+        print("{}%".format(int(counter*100)))
+        counter += 0.1
       # Get obstacles for layer top view
       obstaclesForLayer = self.convertObstaclesTo2d(i/self.densPerMeter)
       
@@ -122,8 +126,12 @@ class AirFlow:
       self.copyLayerTo3DArray(x, y, i)
     
     # Simulate side layers
+    counter = 0.1
     print("AF:", "Start calculating side view")
     for i in range(self.ny):
+      if i/self.nz>=counter:
+        print("{}%".format(int(counter*100)))
+        counter += 0.1
       # get obstacles for layer side view
       obstaclesForLayer = self.convertObstaclesTo2d(i/self.densPerMeter, isTopView=False)
       
@@ -202,7 +210,7 @@ class AirFlow:
     return flowArray, self.p
 
 
-  def getRaysFromFlowArray(self, inFlowArray = [], scopeMeter = 4):
+  def getRaysFromFlowArray(self, inFlowArray = [], scopeMeter = 2):
     print("AF:", "Geting Flow Rays")
     
     # check if array is passed if not get new one
@@ -268,17 +276,24 @@ class AirFlow:
                 tmpArrayY = (currPos[1] + y)
                 tmpArrayZ = (currPos[2] + z)
 
+                # if out of array then continue
                 if tmpArrayX < 0 or tmpArrayZ < 0 or tmpArrayZ < 0 or \
                     tmpArrayX >= flowArrayLenX or tmpArrayY >= flowArrayLenY or \
                     tmpArrayZ >= flowArrayLenZ:
                   continue
+                elif flowArray[z][y][x][0] == 0 and flowArray[z][y][x][1] == 0 and \
+                    flowArray[z][y][x][2] == 0:
+                  # if all 0 then continue
+                  continue
                 else:
                   posCalcCount += 1
-                  tmpValX += flowArray[z][y][x][0]
-                  tmpValY += flowArray[z][y][x][1]
-                  tmpValZ += flowArray[z][y][x][2]
-
+                  tmpValX += flowArray[tmpArrayZ][tmpArrayY][tmpArrayX][0]
+                  tmpValY += flowArray[tmpArrayZ][tmpArrayY][tmpArrayX][1]
+                  tmpValZ += flowArray[tmpArrayZ][tmpArrayY][tmpArrayX][2]
+                  
           # Mean value in scope
+          if posCalcCount == 0:
+            break
           tmpValX /= posCalcCount
           tmpValY /= posCalcCount
           tmpValZ /= posCalcCount
