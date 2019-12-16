@@ -37,6 +37,7 @@ flow.getSideViewLayerForMeter(30)
 # rayList = flow.getRaysFromFlowArray(flowArray)
 # filewriter.writeToJSON(rayList, "rays")
 
+# old
 print("Simulation Done")
 
 
