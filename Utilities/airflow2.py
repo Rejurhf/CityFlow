@@ -21,6 +21,10 @@ class AirFlow2:
     self.p = np.zeros((self.nz, self.ny, self.nx))
 
 
+  # Calculate flow
+  def calculateFlow(self):
+    print("AF2: End")
+
 
   # Convert 3d obstacles to 2d
   def convertObstaclesTo2d(self, layerMeter, isTopView = True):

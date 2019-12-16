@@ -7,3 +7,4 @@ with open("config.txt") as inFile:
   buildingList = json.load(inFile)
 
 print(buildingList["name"])
+
