@@ -3,11 +3,11 @@ from utilities import airflow, gridcreator, filewriter
 print("FFOMS:", "Read OSM file")
 
 # initialize grid creator
-gridCreator = gridcreator.GridCreator("resources/map1.osm")
+gridCreator = gridcreator.GridCreator("resources/map2.osm")
 
 # get grid elements
 xSize, ySize, zSize, obstacleList = gridCreator.getGridElements()
-densPerMeter = 0.1
+densPerMeter = 0.5
 
 print("FFOMS:", "xSize: {}, ySize: {}, zSize: {}".format(xSize, ySize, zSize))
 print("FFOMS:", "Density per meter:", densPerMeter)
@@ -31,7 +31,7 @@ flow.getSideViewLayerForMeter(30)
 # flowArray, pList = flow.getFlowArray()
 
 # Save array to file
-filewriter.writeToJSON(obstacleList, "buildings")
+# filewriter.writeToJSON(obstacleList, "buildings")
 
 # Get ray list and save it to file
 # rayList = flow.getRaysFromFlowArray(flowArray)

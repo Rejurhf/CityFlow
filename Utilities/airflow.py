@@ -109,11 +109,11 @@ class AirFlow:
   def calculateFlow(self):
     # Simulate top layers
     print("AF:", "Start calculating top view")
-    counter = 0.1
+    counter = 0
     for i in range(self.nz):
       if i/self.nz>=counter:
         print("{}%".format(int(counter*100)))
-        counter += 0.1
+        counter += 0.2
       # Get obstacles for layer top view
       obstaclesForLayer = self.convertObstaclesTo2d(i/self.densPerMeter)
       
@@ -126,12 +126,12 @@ class AirFlow:
       self.copyLayerTo3DArray(x, y, i)
     
     # Simulate side layers
-    counter = 0.1
+    counter = 0
     print("AF:", "Start calculating side view")
     for i in range(self.ny):
-      if i/self.nz>=counter:
+      if i/self.ny>=counter:
         print("{}%".format(int(counter*100)))
-        counter += 0.1
+        counter += 0.2
       # get obstacles for layer side view
       obstaclesForLayer = self.convertObstaclesTo2d(i/self.densPerMeter, isTopView=False)
       
