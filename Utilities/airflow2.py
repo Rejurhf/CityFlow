@@ -14,16 +14,32 @@ class AirFlow2:
     self.ny = int(self.ySize * self.densPerMeter) + 1
     self.nz = int(self.zSize * self.densPerMeter) + 1
 
+    # Create ray list
+    self.rayList = []
+
     # Create 3d arrays
-    self.vX = np.zeros((self.nz, self.ny, self.nx))
-    self.vY = np.zeros((self.nz, self.ny, self.nx))
-    self.vZ = np.zeros((self.nz, self.ny, self.nx))
+    self.v = np.zeros((self.nz, self.ny, self.nx, 3))
     self.p = np.zeros((self.nz, self.ny, self.nx))
 
 
   # Calculate flow
   def calculateFlow(self):
+    # Calculate rays
+    for z in range(self.nz):
+      for y in range(self.ny):
+        # Declare tmp ray list
+        rayPoints = []
+        
+        for x in range(self.nx):
+          rayPoints.append([x,y,z])
+        
+        # Add ray to ray list
+        self.rayList.append(rayPoints)
+
     print("AF2: End")
+
+
+  # Convert rays to 3d array
 
 
   # Convert 3d obstacles to 2d
@@ -104,9 +120,16 @@ class AirFlow2:
     y = np.linspace(0, self.ySize, self.ny) # last point included, so exactly self.ny points
     
     X,Y = np.meshgrid(x, y)     # makes 2-dimensional mesh grid
-    array2dX = self.vX[zLayer]  # Get layers
-    array2dY = self.vY[zLayer]
+    # Get layers
+    array2dX = self.v[zLayer][:][:][0]
+    array2dY = self.v[zLayer][:][:][1]
     array2dP = self.p[zLayer]
+
+    print(array2dX)
+    print(len(array2dX))
+    print(len(array2dX[0]))
+    print(len(array2dX[0][0]))
+
 
     # Get only obstacles from current layer
     listOf2dObstacles = self.convertObstaclesTo2d(meterAboveGround, isTopView = True)
@@ -126,9 +149,10 @@ class AirFlow2:
     z = np.linspace(0, self.zSize, self.nz) # last point included, so exactly self.ny points
     
     X,Z = np.meshgrid(x, z)     # makes 2-dimensional mesh grid
-    array2dX = self.getSideView2dArray(self.vX, yLayer) # Get layers
-    array2dZ = self.getSideView2dArray(self.vZ, yLayer)
-    array2dP = self.getSideView2dArray(self.p, yLayer)
+    # Get layers
+    array2dX = self.v[:][yLayer][:][0] 
+    array2dZ = self.v[:][yLayer][:][2]
+    array2dP = self.p[:][yLayer][:]
 
     # only obstacles from current layer
     listOf2dObstacles = self.convertObstaclesTo2d(yLayer, isTopView = False)
