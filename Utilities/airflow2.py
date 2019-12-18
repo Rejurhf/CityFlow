@@ -1,7 +1,7 @@
 import numpy as np
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
-from utilities import visualize, rays2dcalculator
+from utilities import visualize, rays2dcalculator, converters
 
 class AirFlow2:
   def __init__(self, xSize, ySize, zSize, densPerMeter, obstacleList):
@@ -49,13 +49,35 @@ class AirFlow2:
         posY = y
         posZ = z
 
-        # Find next legal position
+        # Define colision point which stores point on which ray hits obstacle
+        colisionPos = []
+        # Define pos on end corner of obstacle and target position
+        cornerPos = []
+        targetPos = []
+
+        # Get ray route
         while 0 <= posX < self.nx and 0 <= posY < self.ny and 0 <= posZ < self.nz:
           rayPoints.append([posX,posY,posZ])
 
           if not self.isPointInObstacle(posX+1,posY,posZ):
-            posX += 1
+            # If no obstacle ahead
+            if colisionPos and (posY != colisionPos[1] or posZ != colisionPos[2]):
+              posX, posY, posZ, colisionPos, cornerPos, targetPos = \
+                self.goToTargetPositionDetermination(
+                  posX, posY, posZ, colisionPos, cornerPos, targetPos)
+            elif colisionPos and posY == colisionPos[1] and posZ == colisionPos[2]:
+              # Ray in original pos delete target and sideLen
+              colisionPos = []
+              cornerPos = []
+              targetPos = []
+              posX += 1
+            else: 
+              posX += 1
           else:
+            # Add point to colision
+            colisionPos = [posX, posY, posZ]
+            cornerPos = []
+            targetPos = []
             # direction="x+" means, obstacle por posX+=1
             posX, posY, posZ, subRayList = self.getShortestRoute(posX, posY, posZ, direction="x+")
             rayPoints.extend(subRayList)
@@ -65,6 +87,63 @@ class AirFlow2:
         self.rayList.append(rayPoints)
 
 
+  # Create ray list go to target position
+  def goToTargetPositionDetermination(self, posX, posY, posZ, colisionPos, cornerPos, targetPos):
+    # Flag to check if sidelen was added
+    isSideObs = False
+
+    newPosX = posX
+    newPosY = posY
+    newPosZ = posZ
+
+    for i in range(1, 3):
+      # To avoid repetition
+      if i == 1:
+        posYZ = posY
+        mode = "y"
+      else:
+        posYZ = posZ
+        mode = "z"
+
+      # Go to original position
+      if posYZ != colisionPos[i]:
+        flowDir = (1 if posYZ < colisionPos[i] else -1)
+        # If can not go towards the target go straight 
+        # (flowDir*(2-i)) = 0 if mode z 2-i and i-1 one of them is always 0 depending on the mode
+        if not self.isPointInObstacle(posX, posY+(flowDir*(2-i)), posZ+(flowDir*(i-1))):
+          # If can go to target go for it
+          if not cornerPos:
+            # Define obstacle corner pos and target pos, do it only once
+            cornerPos = [posX, posY, posZ]
+            # put target position, 3 deltas Y from obstacle 
+            shadow = self.getColisionObstacleSize(*colisionPos)
+            if shadow == 0:
+              shadow = posYZ - colisionPos[i]
+            targetPos = [posX + abs(shadow*3), colisionPos[1], colisionPos[2]]
+
+          # If point more than 1 point away from guide line 
+          # (line between corner and target) go to target
+          distanceFromGuideLine = converters.getDistanceFromPointToLine(
+            cornerPos, targetPos, [posX, posY, posZ], mode)
+          if distanceFromGuideLine > 0.6:
+            if i == 1:
+              newPosY += flowDir
+            else:
+              newPosZ += flowDir
+          else:
+            newPosX += 1
+            isSideObs = True
+        else:
+          # Go straight
+          newPosX += 1
+          isSideObs = True
+
+    if newPosX == posX and newPosY == posY and newPosZ == posZ:
+      newPosX += 1
+
+    return newPosX, newPosY, newPosZ, colisionPos, cornerPos, targetPos
+
+
   # Check if point is in obstacle
   def isPointInObstacle(self, posX, posY, posZ):
     for obstacle in self.obstacleList:
@@ -72,16 +151,41 @@ class AirFlow2:
       tmpPoint = Point(posX/self.densPerMeter, posY/self.densPerMeter)
       polygon = Polygon(obstacle["coordinates"])
 
+      # If point on the edge of polygon
+      if polygon.exterior.distance(tmpPoint) == 0 and posZ/self.densPerMeter <= obstacle["height"]:
+        return True
+
       # If in obstacle (check height) return True
-      if polygon.contains(tmpPoint) and \
-          posZ/self.densPerMeter <= obstacle["height"]:
+      if polygon.contains(tmpPoint) and posZ/self.densPerMeter <= obstacle["height"]:
         return True
     return False
 
 
+  # Get size of obstacle to measure shadow
+  def getColisionObstacleSize(self, posX, posY, posZ, mode="y"):
+    # Go + Direction
+    plusShift = 0
+    minusShift = 0
+
+    if mode == "y":
+      yMute = 1
+      zMute = 0
+    else:
+      yMute = 0
+      zMute = 1
+
+    while self.isPointInObstacle(posX+1, posY+(plusShift*yMute), posZ+(plusShift*zMute)):
+      plusShift += 1
+
+    while self.isPointInObstacle(posX+1, posY-(minusShift*yMute), posZ-(minusShift*zMute)):
+      minusShift += 1
+
+    return (plusShift + minusShift)/2
+
+
   # Get shortest route around obstacle
   def getShortestRoute(self, posX, posY, posZ, direction="x+"):
-    shift = 1
+    shift = 0
     bestDirection = ""
     # Get direction with shortest route
     while not bestDirection and (posX+shift<self.nx or posX-shift>=0 or \
@@ -96,6 +200,9 @@ class AirFlow2:
         if posZ-shift >= 0 and not self.isPointInObstacle(posX+1, posY, posZ-shift):
           bestDirection += "z-"
       shift += 1
+
+    # Fix shift error
+    shift -= 1
 
     # Determine new point position
     subRayList =[]
@@ -156,7 +263,7 @@ class AirFlow2:
     tmpX = posX
     tmpY = posY
     tmpZ = posZ
-    for i in range(0, shift-1):
+    for i in range(0, shift):
       # Determine next step
       if tmpX != newPosX:
         tmpX += (1 if tmpX < newPosX else -1)
@@ -169,7 +276,6 @@ class AirFlow2:
       subRayList.append([tmpX, tmpY, tmpZ])
 
     return newPosX, newPosY, newPosZ, subRayList 
-
 
 
   # Convert rays to 3d array
@@ -197,7 +303,11 @@ class AirFlow2:
       # Add last position same value as previous
       self.v[ray[-1][2],ray[-1][1],ray[-1][0]] = self.v[ray[-2][2],ray[-2][1],ray[-2][0]]
 
-        
+    # Create pressure array
+    for z in range(self.nz):
+      for y in range(self.ny):
+        for x in range(self.nx):
+          self.p[z,y,x] =  sum(abs(v) for v in self.v[z,y,x])
 
 
 
@@ -270,7 +380,7 @@ class AirFlow2:
     # Get layers
     array2dX = self.v[zLayer,:,:,0]
     array2dY = self.v[zLayer,:,:,1]
-    array2dP = self.p[zLayer]
+    array2dP = self.p[zLayer,:,:]
 
     # Get only obstacles from current layer
     listOf2dObstacles = self.convertObstaclesTo2d(meterAboveGround, isTopView = True)
