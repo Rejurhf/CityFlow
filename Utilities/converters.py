@@ -19,5 +19,13 @@ def getDistanceFromPointToLine(p, q, point, mode="y"):
     return abs(curY - point[2])
 
 
+def printProgress(progress, end=False):
+  progress = int(progress * 25)
 
+  str = "[" + (u'\u2588' * progress) + " "*(25-progress) + "]"
+
+  if end:
+    print(str)
+  else:  
+    print(str, end="\r")
 

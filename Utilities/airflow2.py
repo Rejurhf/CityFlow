@@ -40,16 +40,21 @@ class AirFlow2:
 
   # Calculate ray list
   def createRayList(self):
+    percentIndicator = 0
+    converters.printProgress(percentIndicator)
     # Calculate rays
     for z in range(self.nz):
       for y in range(self.ny):
+        if(percentIndicator+0.04 <= (z*self.ny + y)/(self.ny*self.nz)):
+          percentIndicator = round(percentIndicator+0.04, 2)
+          converters.printProgress(percentIndicator)
         # Declare tmp ray list
         rayPoints = []
         posX = 0
         posY = y
         posZ = z
 
-        # Define colision point which stores point on which ray hits obstacle
+        # Define colision point which stores point on which ray hits obstacle[||   ]
         colisionPos = []
         # Define pos on end corner of obstacle and target position
         cornerPos = []
@@ -79,16 +84,18 @@ class AirFlow2:
             cornerPos = []
             targetPos = []
             # direction="x+" means, obstacle por posX+=1
-            posX, posY, posZ, subRayList = self.getShortestRoute([posX, posY, posZ], direction="x+")
+            posX, posY, posZ, subRayList, popCount = \
+              self.getShortestRoute([posX, posY, posZ], direction="x+")
+            # Pop unused points
+            if popCount > 0:
+              rayPoints = rayPoints[:-popCount]
+            # Merge lists
             rayPoints.extend(subRayList)
             posX += 1
-            if colisionPos == [17,22,7]:
-              print(posX, posY, posZ)
-              print(self.isPointInObstacle(posX, posY, posZ))
         
         # Add ray to ray list
         self.rayList.append(rayPoints)
-
+    converters.printProgress(1, end=True)
 
   # Create ray list go to target position
   def goToTargetPositionDetermination(self, posX, posY, posZ, colisionPos, cornerPos, targetPos):
@@ -116,7 +123,7 @@ class AirFlow2:
             # Define obstacle corner pos and target pos, do it only once
             cornerPos = [posX, posY, posZ]
             # put target position, 3 deltas Y from obstacle 
-            shadow = self.getColisionObstacleFront(colisionPos, mode)
+            shadow = self.getColisionObstacleFrontLen(colisionPos, mode)
             if shadow == 0:
               shadow = posYZ - colisionPos[i]
             targetPos = [posX + abs(shadow*3), colisionPos[1], colisionPos[2]]
@@ -153,27 +160,53 @@ class AirFlow2:
       targetPos[0] = self.nx
       return targetPos[0], targetPos[1], targetPos[2], []
 
-    # Add start position
-    # startPos = [colisionPos[0]-3, colisionPos[1], colisionPos[2]]
+    # Add start position, half obstacle front before it
+    shadow = self.getColisionObstacleFrontLen(colisionPos, mode)
+    shadow = shadow - int(shadow/2)
+    startPos = [colisionPos[0]-shadow, colisionPos[1], colisionPos[2]]
 
     # Populate subRayList, create route from colisionPos to targetPos
     subRayList = []
-    tmpX = colisionPos[0]
-    tmpY = colisionPos[1]
-    tmpZ = colisionPos[2]
+    tmpX = startPos[0]
+    tmpY = startPos[1]
+    tmpZ = startPos[2]
     while [tmpX, tmpY, tmpZ] != targetPos:
-      # Determine next step
-      if tmpX != targetPos[0]:
-        tmpX += (1 if tmpX < targetPos[0] else -1)
-      if tmpY != targetPos[1]:
-        tmpY += (1 if tmpY < targetPos[1] else -1)
-      if tmpZ != targetPos[2]:
-        tmpZ += (1 if tmpZ < targetPos[2] else -1)
+      # Flag if Y and Z axis always skips
+      flowDir = 0
+
+      for i in range(1, 3):
+        # To avoid repetition
+        if i == 1:
+          if tmpY == targetPos[1]:
+            continue
+          posYZ = startPos[1]
+          locMode = "y"
+        else:
+          if tmpZ == targetPos[2]:
+            continue
+          posYZ = startPos[2]
+          locMode = "z"
+
+        # If point more than 1 point away from guide line 
+        # (line between corner and target) go to target
+        distanceFromGuideLine = converters.getDistanceFromPointToLine(
+          startPos, targetPos, [tmpX, tmpY, tmpZ], locMode)
+        flowDir = (1 if posYZ < targetPos[i] else -1)
+        if distanceFromGuideLine > 0.6:
+          if i == 1:
+            tmpY += flowDir
+          else:
+            tmpZ += flowDir
+        else:
+          tmpX += 1
+
+      if flowDir == 0:
+        tmpX += 1
       
       # Add step to subRayList
       subRayList.append([tmpX, tmpY, tmpZ])
 
-    return targetPos[0], targetPos[1], targetPos[2], subRayList 
+    return targetPos[0], targetPos[1], targetPos[2], subRayList, shadow
 
 
   # Get nearest point to go forward after colision
@@ -274,7 +307,7 @@ class AirFlow2:
 
 
   # Get size of obstacle to measure shadow
-  def getColisionObstacleFront(self, colisionPos, mode="y"):
+  def getColisionObstacleFrontLen(self, colisionPos, mode="y"):
     # Go + Direction
     plusShift = 0
     minusShift = 0
@@ -296,7 +329,7 @@ class AirFlow2:
         colisionPos[0]+1, colisionPos[1]-(minusShift*yMute), colisionPos[2]-(minusShift*zMute)):
       minusShift += 1
 
-    return (plusShift + minusShift)/2
+    return int((plusShift + minusShift)/2)
 
 
 # Rays to array ------------------------------------------------------------------------------------
