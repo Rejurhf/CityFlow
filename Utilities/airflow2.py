@@ -79,9 +79,12 @@ class AirFlow2:
             cornerPos = []
             targetPos = []
             # direction="x+" means, obstacle por posX+=1
-            posX, posY, posZ, subRayList = self.getShortestRoute(posX, posY, posZ, direction="x+")
+            posX, posY, posZ, subRayList = self.getShortestRoute([posX, posY, posZ], direction="x+")
             rayPoints.extend(subRayList)
             posX += 1
+            if colisionPos == [17,22,7]:
+              print(posX, posY, posZ)
+              print(self.isPointInObstacle(posX, posY, posZ))
         
         # Add ray to ray list
         self.rayList.append(rayPoints)
@@ -89,9 +92,6 @@ class AirFlow2:
 
   # Create ray list go to target position
   def goToTargetPositionDetermination(self, posX, posY, posZ, colisionPos, cornerPos, targetPos):
-    # Flag to check if sidelen was added
-    isSideObs = False
-
     newPosX = posX
     newPosY = posY
     newPosZ = posZ
@@ -116,7 +116,7 @@ class AirFlow2:
             # Define obstacle corner pos and target pos, do it only once
             cornerPos = [posX, posY, posZ]
             # put target position, 3 deltas Y from obstacle 
-            shadow = self.getColisionObstacleSize(*colisionPos)
+            shadow = self.getColisionObstacleFront(colisionPos, mode)
             if shadow == 0:
               shadow = posYZ - colisionPos[i]
             targetPos = [posX + abs(shadow*3), colisionPos[1], colisionPos[2]]
@@ -132,17 +132,129 @@ class AirFlow2:
               newPosZ += flowDir
           else:
             newPosX += 1
-            isSideObs = True
         else:
           # Go straight
           newPosX += 1
-          isSideObs = True
 
     if newPosX == posX and newPosY == posY and newPosZ == posZ:
       newPosX += 1
 
     return newPosX, newPosY, newPosZ, colisionPos, cornerPos, targetPos
 
+
+  # Get shortest route around obstacle
+  def getShortestRoute(self, colisionPos, direction="x+"):
+    # Get front target position, pos of nearest edge
+    targetPos, isNoRoute, mode = self.getNearestEdgePointAfterColision(
+      colisionPos[0], colisionPos[1], colisionPos[2], direction="x+")
+
+    # If no route found, return point out of map and end this ray
+    if isNoRoute:
+      targetPos[0] = self.nx
+      return targetPos[0], targetPos[1], targetPos[2], []
+
+    # Add start position
+    # startPos = [colisionPos[0]-3, colisionPos[1], colisionPos[2]]
+
+    # Populate subRayList, create route from colisionPos to targetPos
+    subRayList = []
+    tmpX = colisionPos[0]
+    tmpY = colisionPos[1]
+    tmpZ = colisionPos[2]
+    while [tmpX, tmpY, tmpZ] != targetPos:
+      # Determine next step
+      if tmpX != targetPos[0]:
+        tmpX += (1 if tmpX < targetPos[0] else -1)
+      if tmpY != targetPos[1]:
+        tmpY += (1 if tmpY < targetPos[1] else -1)
+      if tmpZ != targetPos[2]:
+        tmpZ += (1 if tmpZ < targetPos[2] else -1)
+      
+      # Add step to subRayList
+      subRayList.append([tmpX, tmpY, tmpZ])
+
+    return targetPos[0], targetPos[1], targetPos[2], subRayList 
+
+
+  # Get nearest point to go forward after colision
+  def getNearestEdgePointAfterColision(self, posX, posY, posZ, direction="x+"):
+    shift = 0
+    bestDirection = ""
+    mode = ""
+    # Get directions with shortest route
+    while not bestDirection and (posX+shift<self.nx or posX-shift>=0 or \
+        posY+shift<self.ny or posY-shift>=0 or posZ+shift<self.nz or posZ-shift>=0):
+      if direction == "x+":
+        if posY+shift < self.ny and not self.isPointInObstacle(posX+1, posY+shift, posZ):
+          bestDirection += "y+"
+        if posY-shift >= 0 and not self.isPointInObstacle(posX+1, posY-shift, posZ):
+          bestDirection += "y-"
+        if posZ+shift < self.nz and not self.isPointInObstacle(posX+1, posY, posZ+shift):
+          bestDirection += "z+"
+        if posZ-shift >= 0 and not self.isPointInObstacle(posX+1, posY, posZ-shift):
+          bestDirection += "z-"
+      shift += 1
+
+    # -1 cause shift is one step ahead
+    shift -= 1
+
+    # Determine new point position
+    newPosX = posX
+    newPosY = posY
+    newPosZ = posZ
+
+    # In case of many directions
+    # If direction occurs only once add it to target pos
+    if bestDirection.count('x') == 1:
+      # Set mode to x axis have shortest route
+      if not mode:
+        mode = "x"
+      if bestDirection[bestDirection.find('x')+1] == '+':
+        newPosX += shift
+      else:
+        newPosX -= shift
+
+    if bestDirection.count('y') == 1:
+      if not mode:
+        mode = "y"
+      if bestDirection[bestDirection.find('y')+1] == '+':
+        newPosY += shift
+      else:
+        newPosY -= shift
+
+    if bestDirection.count('z') == 1:
+      if not mode:
+        mode = "z"
+      if bestDirection[bestDirection.find('z')+1] == '+':
+        newPosZ += shift
+      else:
+        newPosZ -= shift
+
+    # In case best directions are opposite directions
+    if posX == newPosX and posY == newPosY and posZ == newPosZ:
+      # TODO now only go in one direction, do it to go both directions (split the ray)
+      if bestDirection.count('x') > 1:
+        if not mode:
+          mode = "x"
+        newPosX += shift
+      elif bestDirection.count('y') > 1:
+        if not mode:
+          mode = "y"
+        newPosY += shift
+      else:
+        if not mode:
+          mode = "z"
+        newPosZ += shift
+
+    # In case of no shortest route found, send ending ray flag
+    if posX == newPosX and posY == newPosY and posZ == newPosZ:
+      isNoRoute = False
+      return [newPosX, newPosY, newPosZ], isNoRoute, mode
+
+    # Nearest edge position found, return it with shortest route mode
+    isNoRoute = False
+    return [newPosX, newPosY, newPosZ], isNoRoute, mode
+  
 
   # Check if point is in obstacle
   def isPointInObstacle(self, posX, posY, posZ):
@@ -162,7 +274,7 @@ class AirFlow2:
 
 
   # Get size of obstacle to measure shadow
-  def getColisionObstacleSize(self, posX, posY, posZ, mode="y"):
+  def getColisionObstacleFront(self, colisionPos, mode="y"):
     # Go + Direction
     plusShift = 0
     minusShift = 0
@@ -174,110 +286,20 @@ class AirFlow2:
       yMute = 0
       zMute = 1
 
-    while self.isPointInObstacle(posX+1, posY+(plusShift*yMute), posZ+(plusShift*zMute)):
+    while colisionPos[1]+(plusShift*yMute) < self.ny and colisionPos[2]+(plusShift*zMute) < self.nz and \
+      self.isPointInObstacle(
+        colisionPos[0]+1, colisionPos[1]+(plusShift*yMute), colisionPos[2]+(plusShift*zMute)):
       plusShift += 1
 
-    while self.isPointInObstacle(posX+1, posY-(minusShift*yMute), posZ-(minusShift*zMute)):
+    while colisionPos[1]-(minusShift*yMute) >= 0 and colisionPos[2]-(minusShift*zMute) >= 0 and \
+      self.isPointInObstacle(
+        colisionPos[0]+1, colisionPos[1]-(minusShift*yMute), colisionPos[2]-(minusShift*zMute)):
       minusShift += 1
 
     return (plusShift + minusShift)/2
 
 
-  # Get shortest route around obstacle
-  def getShortestRoute(self, posX, posY, posZ, direction="x+"):
-    shift = 0
-    bestDirection = ""
-    # Get direction with shortest route
-    while not bestDirection and (posX+shift<self.nx or posX-shift>=0 or \
-        posY+shift<self.ny or posY-shift>=0 or posZ+shift<self.nz or posZ-shift>=0):
-      if direction == "x+":
-        if posY+shift < self.ny and not self.isPointInObstacle(posX+1, posY+shift, posZ):
-          bestDirection += "y+"
-        if posY-shift >= 0 and not self.isPointInObstacle(posX+1, posY-shift, posZ):
-          bestDirection += "y-"
-        if posZ+shift < self.nz and not self.isPointInObstacle(posX+1, posY, posZ+shift):
-          bestDirection += "z+"
-        if posZ-shift >= 0 and not self.isPointInObstacle(posX+1, posY, posZ-shift):
-          bestDirection += "z-"
-      shift += 1
-
-    # Fix shift error
-    shift -= 1
-
-    # Determine new point position
-    subRayList =[]
-    newPosX = posX
-    newPosY = posY
-    newPosZ = posZ
-    if len(bestDirection) > 2:
-      # In case of many directions
-      # If direction occurs only once add it to raylist
-      if bestDirection.count('x') == 1:
-        if bestDirection[bestDirection.find('x')+1] == '+':
-          newPosX += shift
-        else:
-          newPosX -= shift
-      if bestDirection.count('y') == 1:
-        if bestDirection[bestDirection.find('y')+1] == '+':
-          newPosY += shift
-        else:
-          newPosY -= shift
-      if bestDirection.count('z') == 1:
-        if bestDirection[bestDirection.find('z')+1] == '+':
-          newPosZ += shift
-        else:
-          newPosZ -= shift
-
-      # In case best directions are opposite directions
-      if posX == newPosX and posY == newPosY and posZ == newPosZ:
-        # TODO now only go in one direction, do it to go both directions
-        if bestDirection.count('x') > 1:
-          newPosX += shift
-        elif bestDirection.count('y') > 1:
-          newPosY += shift
-        else:
-          newPosZ += shift
-    elif len(bestDirection) == 2:
-      # In case of one direction
-      if bestDirection.count('x') == 1:
-        if bestDirection[1] == '+':
-          newPosX += shift
-        else:
-          newPosX -= shift
-      if bestDirection.count('y') == 1:
-        if bestDirection[1] == '+':
-          newPosY += shift
-        else:
-          newPosY -= shift
-      if bestDirection.count('z') == 1:
-        if bestDirection[1] == '+':
-          newPosZ += shift
-        else:
-          newPosZ -= shift
-    else:
-      # In case of no directions, give position out the map
-      newPosX = self.nx
-      return newPosX, newPosY, newPosZ, subRayList
-
-    # Populate subRayList
-    tmpX = posX
-    tmpY = posY
-    tmpZ = posZ
-    for i in range(0, shift):
-      # Determine next step
-      if tmpX != newPosX:
-        tmpX += (1 if tmpX < newPosX else -1)
-      if tmpY != newPosY:
-        tmpY += (1 if tmpY < newPosY else -1)
-      if tmpZ != newPosZ:
-        tmpZ += (1 if tmpZ < newPosZ else -1)
-      
-      # Add step to subRayList
-      subRayList.append([tmpX, tmpY, tmpZ])
-
-    return newPosX, newPosY, newPosZ, subRayList 
-
-
+# Rays to array ------------------------------------------------------------------------------------
   # Convert rays to 3d array
   def convertRaysTo3dArray(self):
     # Get ray
