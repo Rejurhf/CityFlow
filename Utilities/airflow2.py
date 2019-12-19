@@ -86,7 +86,7 @@ class AirFlow2:
             # direction="x+" means, obstacle por posX+=1
             posX, posY, posZ, subRayList, popCount = \
               self.getShortestRoute([posX, posY, posZ], direction="x+")
-            # Pop unused points
+            # Pop unused points 
             if popCount > 0:
               rayPoints = rayPoints[:-popCount]
             # Merge lists
@@ -163,9 +163,16 @@ class AirFlow2:
     # Add start position, half obstacle front before it
     shadow = self.getColisionObstacleFrontLen(colisionPos, mode)
     shadow = shadow - int(shadow/2)
-    startPos = [colisionPos[0]-shadow, colisionPos[1], colisionPos[2]]
+    startPos = []
+    for i in range(shadow+1):
+      if colisionPos[0]-(shadow-i) >= 0 and \
+          not self.isPointInObstacle(colisionPos[0]-(shadow-i), colisionPos[1], colisionPos[2]):
+        startPos = [colisionPos[0]-(shadow-i), colisionPos[1], colisionPos[2]]
+        break
+      if i == shadow and not startPos:
+        startPos = [colisionPos[0]-(shadow), colisionPos[1], colisionPos[2]]
 
-    # Populate subRayList, create route from colisionPos to targetPos
+    # Populate subRayList, create route from colisionPos to targetPos [20, 18, 10] [20, 27, 10]
     subRayList = []
     tmpX = startPos[0]
     tmpY = startPos[1]
