@@ -67,9 +67,12 @@ class AirFlow2:
           if not self.isPointInObstacle(posX+1,posY,posZ):
             # If no obstacle ahead
             if colisionPos and (posY != colisionPos[1] or posZ != colisionPos[2]):
-              posX, posY, posZ, colisionPos, cornerPos, targetPos = \
+              posX, posY, posZ, cornerPos, targetPos = \
                 self.goToTargetPositionDetermination(
                   posX, posY, posZ, colisionPos, cornerPos, targetPos)
+
+              # posX, posY, posZ, subRayList = 
+              self.sGetSideRay([posX, posY, posZ], colisionPos)
             elif colisionPos and posY == colisionPos[1] and posZ == colisionPos[2]:
               # Ray in original pos delete target and sideLen
               colisionPos = []
@@ -85,7 +88,7 @@ class AirFlow2:
             targetPos = []
             # direction="x+" means, obstacle por posX+=1
             posX, posY, posZ, subRayList, popCount = \
-              self.getShortestRoute([posX, posY, posZ], direction="x+")
+              self.fGetShortestRoute([posX, posY, posZ], direction="x+")
             # Pop unused points 
             if popCount > 0:
               rayPoints = rayPoints[:-popCount]
@@ -146,13 +149,18 @@ class AirFlow2:
     if newPosX == posX and newPosY == posY and newPosZ == posZ:
       newPosX += 1
 
-    return newPosX, newPosY, newPosZ, colisionPos, cornerPos, targetPos
+    return newPosX, newPosY, newPosZ, cornerPos, targetPos
+
+
+  # Get side flow (between front and back of the obstacle)
+  def sGetSideRay(self, startPos, colisionPos):
+    # targetPos = self.getEndOfObstacleSide
 
 
   # Get shortest route around obstacle
-  def getShortestRoute(self, colisionPos, direction="x+"):
+  def fGetShortestRoute(self, colisionPos, direction="x+"):
     # Get front target position, pos of nearest edge
-    targetPos, isNoRoute, mode = self.getNearestEdgePointAfterColision(
+    targetPos, isNoRoute, mode = self.fGetNearestEdgePointAfterColision(
       colisionPos[0], colisionPos[1], colisionPos[2], direction="x+")
 
     # If no route found, return point out of map and end this ray
@@ -217,7 +225,7 @@ class AirFlow2:
 
 
   # Get nearest point to go forward after colision
-  def getNearestEdgePointAfterColision(self, posX, posY, posZ, direction="x+"):
+  def fGetNearestEdgePointAfterColision(self, posX, posY, posZ, direction="x+"):
     shift = 0
     bestDirection = ""
     mode = ""
