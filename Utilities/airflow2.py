@@ -45,8 +45,8 @@ class AirFlow2:
     # Calculate rays
     for z in range(self.nz):
       for y in range(self.ny):
-        if(percentIndicator+0.04 <= (z*self.ny + y)/(self.ny*self.nz)):
-          percentIndicator = round(percentIndicator+0.04, 2)
+        if(percentIndicator+0.02 <= (z*self.ny + y)/(self.ny*self.nz)):
+          percentIndicator = round(percentIndicator+0.02, 2)
           converters.printProgress(percentIndicator)
         # Declare tmp ray list
         rayPoints = []
