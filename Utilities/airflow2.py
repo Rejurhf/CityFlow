@@ -67,12 +67,13 @@ class AirFlow2:
           if not self.isPointInObstacle(posX+1,posY,posZ):
             # If no obstacle ahead
             if colisionPos and (posY != colisionPos[1] or posZ != colisionPos[2]):
-              posX, posY, posZ, cornerPos, targetPos = \
-                self.goToTargetPositionDetermination(
-                  posX, posY, posZ, colisionPos, cornerPos, targetPos)
+              # posX, posY, posZ, cornerPos, targetPos = \
+              #   self.goToTargetPositionDetermination(
+              #     posX, posY, posZ, colisionPos, cornerPos, targetPos)
 
-              # posX, posY, posZ, subRayList = 
-              self.sGetSideRay([posX, posY, posZ], colisionPos)
+              posX, posY, posZ, subRayList = self.sGetSideRay([posX, posY, posZ], colisionPos)
+              rayPoints.extend(subRayList)
+              colisionPos = []
             elif colisionPos and posY == colisionPos[1] and posZ == colisionPos[2]:
               # Ray in original pos delete target and sideLen
               colisionPos = []
@@ -154,8 +155,67 @@ class AirFlow2:
 
   # Get side flow (between front and back of the obstacle)
   def sGetSideRay(self, startPos, colisionPos):
-    # targetPos = self.getEndOfObstacleSide
+    targetPos, sideLen, mode = self.sGetEndOfObstacleSide(startPos, colisionPos, direction="x+")
 
+    colisionFactor = 1
+    yMute = 0
+    zMute = 0
+    if mode.count('y') == 1:
+      yMute = 1
+      if mode[mode.find('y')+1] == '+':
+        yMute = -yMute
+    elif mode.count('z') == 1:
+      zMute = 1
+      if mode[mode.find('z')+1] == '+':
+        zMute = -zMute
+    
+    # Populate side flow list
+    tmpX = startPos[0]
+    tmpY = startPos[1]
+    tmpZ = startPos[2]
+    shift = 0
+    subFlowList = []
+    while [tmpX+shift, tmpY, tmpZ] != targetPos and (tmpX+shift) < self.nx-1 and (tmpX+shift) >= 0:
+      shift += 1
+      shiftS = 0
+      if shift < sideLen/2:
+        shiftS = int(shift/(2))
+      else:
+        shiftS = int((sideLen-shift)/2)
+      subFlowList.append([tmpX+shift, tmpY+(yMute*shiftS), tmpZ+(zMute*shiftS)])
+
+    return targetPos[0], targetPos[1], targetPos[2], subFlowList
+
+
+  # Get nearest point after obstacle
+  def sGetEndOfObstacleSide(self, startPos, colisionPos, direction="x+"):
+    # Shift indicator
+    shift = 1
+
+    # Get colision mode
+    mode = ""
+    shiftY = 0
+    shiftZ = 0
+    if startPos[1] < colisionPos[1]:
+      mode += "y+"
+      shiftY += 1
+    elif startPos[1] > colisionPos[1]:
+      mode += "y-"
+      shiftY -= 1
+    if startPos[2] < colisionPos[2]:
+      mode += "z+"
+      shiftZ += 1
+    elif startPos[2] > colisionPos[2]:
+      mode += "z-"
+      shiftZ -= 1
+
+    # Go to end of obstacle
+    while self.isPointInObstacle(startPos[0]+shift, startPos[1]+shiftY, startPos[2]+shiftZ) and \
+        not self.isPointInObstacle(startPos[0]+shift, startPos[1], startPos[2]):
+      shift += 1
+
+    return [startPos[0]+shift, startPos[1], startPos[2]], shift, mode
+      
 
   # Get shortest route around obstacle
   def fGetShortestRoute(self, colisionPos, direction="x+"):
