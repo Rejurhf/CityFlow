@@ -99,6 +99,11 @@ class AirFlow2:
             posX, posY, posZ, subRayList = \
               self.sGetSideRay([posX, posY, posZ], colisionPos, edgeShift)
             rayPoints.extend(subRayList)
+
+            # Calculate back flow
+            posX, posY, posZ, subRayList = self.bGetBackRay([posX, posY, posZ], colisionPos)
+            rayPoints.extend(subRayList)
+
             colisionPos = []
             posX += 1
         
@@ -158,12 +163,26 @@ class AirFlow2:
     return newPosX, newPosY, newPosZ, cornerPos, targetPos
 
 
+  def bGetBackRay(self, startPos, colisionPos, direction="x+"):
+    # Determine obstacle size and multiply it by 3 to create shadow 
+    shift = 3 * self.getColisionObstacleFrontLen(
+      [startPos[0]-1,colisionPos[1], colisionPos[2]], flowMode="x-")
+
+    if colisionPos[2] == 2:
+      print(shift)
+
+    targetPos = [startPos[0]+shift, colisionPos[1], colisionPos[2]]
+
+    # Populate subRayList, create route from colisionPos to targetPos 
+    targetPos, subRayList = self.goFromStartToTarget(startPos, targetPos)
+
+    return targetPos[0], targetPos[1], targetPos[2], subRayList
 
 
   # Get side flow (between front and back of the obstacle)
-  def sGetSideRay(self, startPos, colisionPos, startShift):
+  def sGetSideRay(self, startPos, colisionPos, startShift, direction="x+"):
     targetPos, sideLen, mode = \
-      self.sGetEndOfObstacleSide(startPos, colisionPos, startShift, direction="x+")
+      self.sGetEndOfObstacleSide(startPos, colisionPos, startShift, direction)
 
     yMute = 0
     zMute = 0
@@ -272,8 +291,7 @@ class AirFlow2:
       else:
         targetPos[2] -= targetShift
 
-
-    # Populate subRayList, create route from colisionPos to targetPos [20, 18, 10] [20, 27, 10]
+    # Populate subRayList, create route from colisionPos to targetPos 
     targetPos, subRayList = self.goFromStartToTarget(startPos, targetPos)
 
     return targetPos[0], targetPos[1], targetPos[2], subRayList, shadow, targetShift
@@ -431,7 +449,7 @@ class AirFlow2:
 
 
   # Get size of obstacle to measure shadow
-  def getColisionObstacleFrontLen(self, colisionPos, mode="y"):
+  def getColisionObstacleFrontLen(self, colisionPos, mode="y", flowMode = "x+"):
     # Go + Direction
     plusShift = 0
     minusShift = 0
@@ -443,14 +461,20 @@ class AirFlow2:
       yMute = 0
       zMute = 1
 
+    # X flow direction
+    if flowMode == "x+":
+      delta = 1
+    else:
+      delta = -1
+
     while colisionPos[1]+(plusShift*yMute) < self.ny and colisionPos[2]+(plusShift*zMute) < self.nz and \
       self.isPointInObstacle(
-        colisionPos[0]+1, colisionPos[1]+(plusShift*yMute), colisionPos[2]+(plusShift*zMute)):
+        colisionPos[0]+delta, colisionPos[1]+(plusShift*yMute), colisionPos[2]+(plusShift*zMute)):
       plusShift += 1
 
     while colisionPos[1]-(minusShift*yMute) >= 0 and colisionPos[2]-(minusShift*zMute) >= 0 and \
       self.isPointInObstacle(
-        colisionPos[0]+1, colisionPos[1]-(minusShift*yMute), colisionPos[2]-(minusShift*zMute)):
+        colisionPos[0]+delta, colisionPos[1]-(minusShift*yMute), colisionPos[2]-(minusShift*zMute)):
       minusShift += 1
 
     return int((plusShift + minusShift)/2)
