@@ -111,65 +111,12 @@ class AirFlow2:
         self.rayList.append(rayPoints)
     converters.printProgress(1, end=True)
 
-  # Create ray list go to target position
-  def goToTargetPositionDetermination(self, posX, posY, posZ, colisionPos, cornerPos, targetPos):
-    newPosX = posX
-    newPosY = posY
-    newPosZ = posZ
-
-    for i in range(1, 3):
-      # To avoid repetition
-      if i == 1:
-        posYZ = posY
-        mode = "y"
-      else:
-        posYZ = posZ
-        mode = "z"
-
-      # Go to original position
-      if posYZ != colisionPos[i]:
-        flowDir = (1 if posYZ < colisionPos[i] else -1)
-        # If can not go towards the target go straight 
-        # (flowDir*(2-i)) = 0 if mode z 2-i and i-1 one of them is always 0 depending on the mode
-        if not self.isPointInObstacle(posX, posY+(flowDir*(2-i)), posZ+(flowDir*(i-1))):
-          # If can go to target go for it
-          if not cornerPos:
-            # Define obstacle corner pos and target pos, do it only once
-            cornerPos = [posX, posY, posZ]
-            # put target position, 3 deltas Y from obstacle 
-            shadow = self.getColisionObstacleFrontLen(colisionPos, mode)
-            if shadow == 0:
-              shadow = posYZ - colisionPos[i]
-            targetPos = [posX + abs(shadow*3), colisionPos[1], colisionPos[2]]
-
-          # If point more than 1 point away from guide line 
-          # (line between corner and target) go to target
-          distanceFromGuideLine = converters.getDistanceFromPointToLine(
-            cornerPos, targetPos, [posX, posY, posZ], mode)
-          if distanceFromGuideLine > 0.6:
-            if i == 1:
-              newPosY += flowDir
-            else:
-              newPosZ += flowDir
-          else:
-            newPosX += 1
-        else:
-          # Go straight
-          newPosX += 1
-
-    if newPosX == posX and newPosY == posY and newPosZ == posZ:
-      newPosX += 1
-
-    return newPosX, newPosY, newPosZ, cornerPos, targetPos
-
-
+  
+  # Get flow after obstacle
   def bGetBackRay(self, startPos, colisionPos, direction="x+"):
     # Determine obstacle size and multiply it by 3 to create shadow 
     shift = 3 * self.getColisionObstacleFrontLen(
       [startPos[0]-1,colisionPos[1], colisionPos[2]], flowMode="x-")
-
-    if colisionPos[2] == 2:
-      print(shift)
 
     targetPos = [startPos[0]+shift, colisionPos[1], colisionPos[2]]
 
