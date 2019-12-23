@@ -142,22 +142,18 @@ class AirFlow2:
       if mode[mode.find('z')+1] == '+':
         zMute = -zMute
     
+    # Calculate sub shift
+    shiftS = int(sideLen/8)
+    # Create sub target
+    subTargetPos = [startPos[0]+int(sideLen/4), 
+      targetPos[1]+(yMute*shiftS), targetPos[2]+(zMute*shiftS)]
 
-    # targetPos, subFlowList = self.goFromStartToTarget(startPos, targetPos)
-    # Populate side flow list
-    tmpX = startPos[0]
-    tmpY = startPos[1]
-    tmpZ = startPos[2]
-    shift = 0
-    subFlowList = []
-    while [tmpX+shift, tmpY, tmpZ] != targetPos and (tmpX+shift) < self.nx-1 and (tmpX+shift) >= 0:
-      shift += 1
-      shiftS = 0
-      if shift < sideLen/2:
-        shiftS = int(shift/3)
-      else:
-        shiftS = int((sideLen-shift)/4)
-      subFlowList.append([tmpX+shift, tmpY+(yMute*shiftS), tmpZ+(zMute*shiftS)])
+    # Populate subRayList, create route from startPos to subTargetPos 
+    subStartPos, subRayList = self.goFromStartToTarget(startPos, subTargetPos)
+    subFlowList = subRayList
+    # Populate subRayList, create route from subStartPos to targetPos 
+    targetPos, subRayList = self.goFromStartToTarget(subStartPos, targetPos)
+    subFlowList.extend(subRayList)
 
     return targetPos[0], targetPos[1], targetPos[2], subFlowList
 
@@ -444,11 +440,25 @@ class AirFlow2:
 
         # Find next direction
         if ray[i+1][0] != posX:
+          # Add go direction
           self.v[posZ,posY,posX,0] += ray[i+1][0] - posX
+          # If go in multiple sides divide it by number of sides
+          if ray[i+1][1] != posY and ray[i+1][2] != posZ:
+            self.v[posZ,posY,posX,0] /= 3
+          elif ray[i+1][1] != posY or ray[i+1][2] != posZ:
+            self.v[posZ,posY,posX,0] /= 2
         if ray[i+1][1] != posY:
           self.v[posZ,posY,posX,1] += ray[i+1][1] - posY
+          if ray[i+1][0] != posX and ray[i+1][2] != posZ:
+            self.v[posZ,posY,posX,1] /= 3
+          elif ray[i+1][0] != posX or ray[i+1][2] != posZ:
+            self.v[posZ,posY,posX,1] /= 2
         if ray[i+1][2] != posZ:
           self.v[posZ,posY,posX,2] += ray[i+1][2] - posZ
+          if ray[i+1][0] != posX and ray[i+1][1] != posY:
+            self.v[posZ,posY,posX,2] /= 3
+          elif ray[i+1][0] != posX or ray[i+1][1] != posY:
+            self.v[posZ,posY,posX,2] /= 2
       
       # Add last position same value as previous
       self.v[ray[-1][2],ray[-1][1],ray[-1][0]] = self.v[ray[-2][2],ray[-2][1],ray[-2][0]]
