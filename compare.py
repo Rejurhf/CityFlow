@@ -10,9 +10,14 @@ densPerMeter = 1
 
 buildingDict = {'name': 'Single', 
   'height': 10, 
-  'coordinates': [(27, 30), (27, 15), (18, 15), (18, 30), (27, 30)]
+  'coordinates': [(27, 27), (27, 18), (18, 18), (18, 27), (27, 27)]
 }
 obstacleList = []
+obstacleList.append(buildingDict)
+buildingDict = {'name': 'Single', 
+  'height': 10, 
+  'coordinates': [(47, 27), (47, 18), (38, 18), (38, 27), (47, 27)]
+}
 obstacleList.append(buildingDict)
 print("C:", "xSize: {}, ySize: {}, zSize: {}".format(xSize, ySize, zSize))
 print("C:", "Density per meter:", densPerMeter)
