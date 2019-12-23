@@ -10,7 +10,7 @@ densPerMeter = 1
 
 buildingDict = {'name': 'Single', 
   'height': 10, 
-  'coordinates': [(27, 27), (27, 18), (18, 18), (18, 27), (27, 27)]
+  'coordinates': [(27, 30), (27, 15), (18, 15), (18, 30), (27, 30)]
 }
 obstacleList = []
 obstacleList.append(buildingDict)
@@ -35,4 +35,4 @@ flow.getTopViewLayerForMeter(2)
 
 # # Get side view for 10m from left
 print("C:", "Show Side View")
-flow.getSideViewLayerForMeter(23)
+# flow.getSideViewLayerForMeter(23)

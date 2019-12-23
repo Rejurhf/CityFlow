@@ -57,9 +57,6 @@ class AirFlow2:
 
         # Define colision point which stores point on which ray hits obstacle[||   ]
         colisionPos = []
-        # Define pos on end corner of obstacle and target position
-        cornerPos = []
-        targetPos = []
 
         # Get ray route
         while 0 <= posX < self.nx and 0 <= posY < self.ny and 0 <= posZ < self.nz:
@@ -68,24 +65,21 @@ class AirFlow2:
           if not self.isPointInObstacle(posX+1,posY,posZ):
             # If no obstacle ahead
             if colisionPos and (posY != colisionPos[1] or posZ != colisionPos[2]):
-              posX, posY, posZ, cornerPos, targetPos = \
-                self.goToTargetPositionDetermination(
-                  posX, posY, posZ, colisionPos, cornerPos, targetPos)
-
-              
+              print("cos")   
             elif colisionPos and posY == colisionPos[1] and posZ == colisionPos[2]:
               # Ray in original pos delete target and sideLen
               colisionPos = []
-              cornerPos = []
-              targetPos = []
               posX += 1
             else: 
               posX += 1
           else:
             # Add point to colision
             colisionPos = [posX, posY, posZ]
-            cornerPos = []
-            targetPos = []
+            flag = False
+            if posY == 22 and posZ == 0:
+              print("Col", colisionPos)
+              flag = True
+            
             # direction="x+" means, obstacle por posX+=1
             posX, posY, posZ, subRayList, popCount, edgeShift = \
               self.fGetFrontRay([posX, posY, posZ], direction="x+")
@@ -94,23 +88,42 @@ class AirFlow2:
               rayPoints = rayPoints[:-popCount]
             # Merge lists
             rayPoints.extend(subRayList)
-
+            
+            if flag:
+              print("F:", subRayList)
+            
             # Calculate side flow
             posX, posY, posZ, subRayList = \
               self.sGetSideRay([posX, posY, posZ], colisionPos, edgeShift)
             rayPoints.extend(subRayList)
-
+            
+            if flag:
+              print("S:", subRayList)
+            
             # Calculate back flow
             posX, posY, posZ, subRayList = self.bGetBackRay([posX, posY, posZ], colisionPos)
             rayPoints.extend(subRayList)
-
+            
+            if flag:
+              print("B:", subRayList)
+              print(posX, posY, posZ)
+            
             colisionPos = []
             posX += 1
         
+        
+        # self.isRayInObstacle(rayPoints)
         # Add ray to ray list
         self.rayList.append(rayPoints)
     converters.printProgress(1, end=True)
 
+
+  def isRayInObstacle(self, rayPoints):
+    for point in rayPoints:
+      if self.isPointInObstacle(*point):
+        print(point, rayPoints[0])
+        # print(rayPoints)
+        return
   
   # Get flow after obstacle
   def bGetBackRay(self, startPos, colisionPos, direction="x+"):
@@ -214,13 +227,14 @@ class AirFlow2:
       if i == shadow and not startPos:
         startPos = [colisionPos[0]-(shadow), colisionPos[1], colisionPos[2]]
 
-
     # Move target pos depending of colision position
     # Calculate distance between colisin and target
     startTargetDist = \
       int(math.sqrt((colisionPos[1]-targetPos[1])**2 + (colisionPos[2]-targetPos[2])**2))
     # Calculate target shift
     targetShift = int(((1.8*shadow)-startTargetDist)/2)
+    if targetShift < 0:
+      targetShift = 0
 
     # Add shift to target
     if mode.count('y') == 1:
