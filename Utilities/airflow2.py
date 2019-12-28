@@ -57,52 +57,76 @@ class AirFlow2:
 
         # Define colision point which stores point on which ray hits obstacle
         colisionPos = []
+        targetPosition = []
         # Stage indicator 0 -no colision, 1 - front, 2 - side, 3 - back
         stage = 0
-
+        
         # Get ray route
         while 0 <= posX < self.nx and 0 <= posY < self.ny and 0 <= posZ < self.nz:
           # If normal flow add position normally
           rayPoints.append([posX,posY,posZ])
 
+          # Flow if no obstacle involved
           if not colisionPos and not self.isPointInObstacle(posX+1,posY,posZ):
             # No obstacle ahead go straight
             posX += 1
           elif not colisionPos and self.isPointInObstacle(posX+1,posY,posZ):
             # Add point to colision
             colisionPos = [posX, posY, posZ]
+            targetPosition = colisionPos.copy()
             stage = 1
           
-          if stage == 1 and colisionPos:
-            # direction="x+" means, obstacle por posX+=1
-            posX, posY, posZ, subRayList, popCount, edgeShift = \
-              self.fGetFrontRay([posX, posY, posZ], direction="x+")
-            # Pop unused points 
-            if popCount > 0:
-              rayPoints = rayPoints[:-popCount]
-            # Merge lists
-            rayPoints.extend(subRayList)
-            # New stage indicator
-            stage = 2
-          elif stage == 2 and colisionPos:
-            # Calculate side flow
-            posX, posY, posZ, subRayList = \
-              self.sGetSideRay([posX, posY, posZ], colisionPos, edgeShift)
-            rayPoints.extend(subRayList)
-            # New stage indicator
-            stage = 3
-          elif stage == 3 and colisionPos:
-            # Calculate back flow
-            posX, posY, posZ, subRayList = self.bGetBackRay([posX, posY, posZ], colisionPos)
-            rayPoints.extend(subRayList)
-            # Clean out and stage
-            colisionPos = []
-            posX += 1
-            stage = 0
+          # edge shift parameter
+          edgeShift = 0
+          # Flow if obstacle involved
+          while stage > 0:
+            if stage == 1 and colisionPos:
+              # direction="x+" means, obstacle por posX+=1
+              posX, posY, posZ, subRayList, popCount, edgeShift = \
+                self.fGetFrontRay([posX, posY, posZ], direction="x+")
+              # Pop unused points 
+              if popCount > 0:
+                rayPoints = rayPoints[:-popCount]
+              # Merge lists
+              rayPoints.extend(subRayList)
+              # New stage indicator
+              stage = 2
+            elif stage == 2 and colisionPos:
+              # Calculate side flow
+              posX, posY, posZ, subRayList = \
+                self.sGetSideRay([posX, posY, posZ], colisionPos, edgeShift)
+              rayPoints.extend(subRayList)
+              # New stage indicator
+              stage = 3
+            elif stage == 3 and colisionPos:
+              # Calculate back flow
+              posX, posY, posZ, subRayList, colisionPos = \
+                self.bGetBackRay([posX, posY, posZ], targetPosition)
+              rayPoints.extend(subRayList)
+              # Clean out and stage
+              if targetPosition == colisionPos and not self.isPointInObstacle(posX+1,posY,posZ):
+                # No colision occurred and next position is not coliding
+                colisionPos = []
+                posX += 1
+                stage = 0
+              elif self.isPointInObstacle(posX+1,posY,posZ):
+                # No colision but next position is coliding
+                colisionPos = [posX, posY, posZ]
+                targetPosition = colisionPos.copy()
+                stage = 1
+              else:
+                # Colision occurred
+                stage = 1
+          if stageCount > 5:
+            break
+          else:
+            stageCount = 0
+          
         
         # self.isRayInObstacle(rayPoints)
         # Add ray to ray list
-        self.rayList.append(rayPoints)
+        if rayPoints[0] == [0, 22, 6] or rayPoints[0] == [0, 23, 6]:
+          self.rayList.append(rayPoints)
     converters.printProgress(1, end=True)
   
   # Get flow after obstacle
@@ -114,9 +138,13 @@ class AirFlow2:
     targetPos = [startPos[0]+shift, colisionPos[1], colisionPos[2]]
 
     # Populate subRayList, create route from colisionPos to targetPos 
-    targetPos, subRayList = self.goFromStartToTarget(startPos, targetPos)
+    endPos, subRayList, isColision = self.goFromStartToTarget(startPos, targetPos)
 
-    return targetPos[0], targetPos[1], targetPos[2], subRayList
+    # If colision
+    if isColision:
+      return endPos[0], endPos[1], endPos[2], subRayList, endPos
+    # If no colision
+    return endPos[0], endPos[1], endPos[2], subRayList, colisionPos
 
 
   # Get side flow (between front and back of the obstacle)
@@ -142,10 +170,10 @@ class AirFlow2:
       targetPos[1]+(yMute*shiftS), targetPos[2]+(zMute*shiftS)]
 
     # Populate subRayList, create route from startPos to subTargetPos 
-    subStartPos, subRayList = self.goFromStartToTarget(startPos, subTargetPos)
+    subStartPos, subRayList, isColision = self.goFromStartToTarget(startPos, subTargetPos)
     subFlowList = subRayList
     # Populate subRayList, create route from subStartPos to targetPos 
-    targetPos, subRayList = self.goFromStartToTarget(subStartPos, targetPos)
+    targetPos, subRayList, isColision = self.goFromStartToTarget(subStartPos, targetPos)
     subFlowList.extend(subRayList)
 
     return targetPos[0], targetPos[1], targetPos[2], subFlowList
@@ -153,6 +181,7 @@ class AirFlow2:
 
   # Get nearest point after obstacle
   def sGetEndOfObstacleSide(self, startPos, colisionPos, startShift, direction="x+"):
+
     # Shift indicator
     shift = 1
 
@@ -229,7 +258,7 @@ class AirFlow2:
         targetPos[2] -= targetShift
 
     # Populate subRayList, create route from colisionPos to targetPos 
-    targetPos, subRayList = self.goFromStartToTarget(startPos, targetPos)
+    targetPos, subRayList, isColision = self.goFromStartToTarget(startPos, targetPos)
 
     return targetPos[0], targetPos[1], targetPos[2], subRayList, shadow, targetShift
 
@@ -322,7 +351,7 @@ class AirFlow2:
 
   # Go from start to target
   def goFromStartToTarget(self, startPos, targetPos):
-    # Populate subRayList, create route from colisionPos to targetPos [20, 18, 10] [20, 27, 10]
+    # Populate subRayList, create route from colisionPos to targetPos
     subRayList = []
     tmpX = startPos[0]
     tmpY = startPos[1]
@@ -360,12 +389,17 @@ class AirFlow2:
       if flowDir == 0:
         tmpX += 1
       
+      # If colision return 
+      if self.isPointInObstacle(tmpX, tmpY, tmpZ):
+        endPos = subRayList[-1] if subRayList else targetPos.copy()
+        return endPos, subRayList, True
+      
       # Add step to subRayList
       subRayList.append([tmpX, tmpY, tmpZ])
     
 
     endPos = targetPos.copy()
-    return endPos, subRayList
+    return endPos, subRayList, False
 
 
   # Check if point is in obstacle
