@@ -8,15 +8,23 @@ ySize = 45
 zSize = 20
 densPerMeter = 1
 
+firstX = 18
+firstY = 13
+depth = 9
+secondY = 14
+
 buildingDict = {'name': 'Single', 
   'height': 10, 
-  'coordinates': [(27, 27), (27, 18), (18, 18), (18, 27), (27, 27)]
+  'coordinates': [(firstX+depth, firstY+depth), (firstX+depth, firstY), 
+    (firstX, firstY), (firstX, firstY+depth), (firstX+depth, firstY+depth)]
 }
+
 obstacleList = []
 obstacleList.append(buildingDict)
 buildingDict = {'name': 'Single', 
   'height': 10, 
-  'coordinates': [(47, 27), (47, 18), (38, 18), (38, 27), (47, 27)]
+  'coordinates': [(firstX+depth, firstY+depth+secondY), (firstX+depth, firstY+secondY), 
+    (firstX, firstY+secondY), (firstX, firstY+depth+secondY), (firstX+depth, firstY+depth+secondY)]
 }
 obstacleList.append(buildingDict)
 print("C:", "xSize: {}, ySize: {}, zSize: {}".format(xSize, ySize, zSize))
@@ -36,7 +44,7 @@ flow.calculateFlow()
 
 # # Get top view for 2m above ground
 print("C:", "Show Top View")
-flow.getTopViewLayerForMeter(2)
+flow.getTopViewLayerForMeter(1)
 
 
 # # Get side view for 10m from left

@@ -60,7 +60,7 @@ class AirFlow2:
         targetPosition = []
         # Stage indicator 0 -no colision, 1 - front, 2 - side, 3 - back
         stage = 0
-        
+
         # Get ray route
         while 0 <= posX < self.nx and 0 <= posY < self.ny and 0 <= posZ < self.nz:
           # If normal flow add position normally
@@ -107,26 +107,21 @@ class AirFlow2:
               if targetPosition == colisionPos and not self.isPointInObstacle(posX+1,posY,posZ):
                 # No colision occurred and next position is not coliding
                 colisionPos = []
+                targetPosition = []
                 posX += 1
                 stage = 0
               elif self.isPointInObstacle(posX+1,posY,posZ):
                 # No colision but next position is coliding
+                # targetPosition = colisionPos.copy()
                 colisionPos = [posX, posY, posZ]
-                targetPosition = colisionPos.copy()
                 stage = 1
               else:
                 # Colision occurred
-                stage = 1
-          if stageCount > 5:
-            break
-          else:
-            stageCount = 0
-          
+                stage = 1          
         
         # self.isRayInObstacle(rayPoints)
         # Add ray to ray list
-        if rayPoints[0] == [0, 22, 6] or rayPoints[0] == [0, 23, 6]:
-          self.rayList.append(rayPoints)
+        self.rayList.append(rayPoints)
     converters.printProgress(1, end=True)
   
   # Get flow after obstacle
