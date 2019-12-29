@@ -60,6 +60,8 @@ class AirFlow2:
         targetPosition = []
         # Stage indicator 0 -no colision, 1 - front, 2 - side, 3 - back
         stage = 0
+        stageCount = 0
+        breakFlag = False
 
         # Get ray route
         while 0 <= posX < self.nx and 0 <= posY < self.ny and 0 <= posZ < self.nz:
@@ -84,6 +86,10 @@ class AirFlow2:
               # direction="x+" means, obstacle por posX+=1
               posX, posY, posZ, subRayList, popCount, edgeShift = \
                 self.fGetFrontRay([posX, posY, posZ], direction="x+")
+
+              if posX >= self.nx:
+                breakFlag = True
+                break
               # Pop unused points 
               if popCount > 0:
                 rayPoints = rayPoints[:-popCount]
@@ -115,9 +121,20 @@ class AirFlow2:
                 # targetPosition = colisionPos.copy()
                 colisionPos = [posX, posY, posZ]
                 stage = 1
+                stageCount += 1
               else:
                 # Colision occurred
-                stage = 1          
+                stage = 1      
+                stageCount += 1
+
+            if stageCount > 10:
+              print(rayPoints[0])
+              breakFlag = True
+              break
+          if breakFlag:
+            stageCount = 0
+            breakFlag = False
+            break
         
         # self.isRayInObstacle(rayPoints)
         # Add ray to ray list
@@ -215,7 +232,7 @@ class AirFlow2:
     # If no route found, return point out of map and end this ray
     if isNoRoute:
       targetPos[0] = self.nx
-      return targetPos[0], targetPos[1], targetPos[2], []
+      return targetPos[0], targetPos[1], targetPos[2], [], 0, 0
 
     # Add start position, half obstacle front before it
     shadow = self.getColisionObstacleFrontLen(colisionPos, mode)
@@ -263,19 +280,42 @@ class AirFlow2:
     shift = 0
     bestDirection = ""
     mode = ""
+    # Define lock if there is barier not to cross by search, lock = [y+ lock, y-, z+, z-]
+    lock = [False, False, False, False]
     # Get directions with shortest route
     while not bestDirection and (posX+shift<self.nx or posX-shift>=0 or \
         posY+shift<self.ny or posY-shift>=0 or posZ+shift<self.nz or posZ-shift>=0):
       if direction == "x+":
-        if posY+shift < self.ny and not self.isPointInObstacle(posX+1, posY+shift, posZ):
+        if not lock[0] and posY+shift < self.ny and \
+            not self.isPointInObstacle(posX+1, posY+shift, posZ):
           bestDirection += "y+"
-        if posY-shift >= 0 and not self.isPointInObstacle(posX+1, posY-shift, posZ):
+        elif not lock[0] and (posY+shift >= self.ny or self.isPointInObstacle(posX, posY+shift, posZ)):
+          lock[0] = True
+        if not lock[1] and posY-shift >= 0 and \
+            not self.isPointInObstacle(posX+1, posY-shift, posZ):
           bestDirection += "y-"
-        if posZ+shift < self.nz and not self.isPointInObstacle(posX+1, posY, posZ+shift):
+        elif not lock[1] and (posY-shift < 0 or self.isPointInObstacle(posX, posY-shift, posZ)):
+          lock[1] = True
+        if not lock[2] and posZ+shift < self.nz and \
+            not self.isPointInObstacle(posX+1, posY, posZ+shift):
           bestDirection += "z+"
-        if posZ-shift >= 0 and not self.isPointInObstacle(posX+1, posY, posZ-shift):
+        elif not lock[2] and (posZ+shift >= self.nz or self.isPointInObstacle(posX, posY, posZ+shift)):
+          lock[2] = True
+        if not lock[3] and posZ-shift >= 0 and \
+            not self.isPointInObstacle(posX+1, posY, posZ-shift):
           bestDirection += "z-"
+        elif not lock[3] and (posZ-shift < 0 or self.isPointInObstacle(posX, posY, posZ-shift)):
+          lock[3] = True
+
+      # If barier in every direction
+      if lock == [True, True, True, True]:
+        break
       shift += 1
+
+    # In case of no shortest route found, send ending ray flag
+    if not bestDirection:
+      isNoRoute = True
+      return [posX, posY, posZ], isNoRoute, mode
 
     # -1 cause shift is one step ahead
     shift -= 1
@@ -333,11 +373,6 @@ class AirFlow2:
         if not mode:
           mode = "z+"
         newPosZ += shift
-
-    # In case of no shortest route found, send ending ray flag
-    if posX == newPosX and posY == newPosY and posZ == newPosZ:
-      isNoRoute = False
-      return [newPosX, newPosY, newPosZ], isNoRoute, mode
 
     # Nearest edge position found, return it with shortest route mode
     isNoRoute = False
