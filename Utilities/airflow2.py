@@ -24,10 +24,17 @@ class AirFlow2:
     self.v = np.zeros((self.nz, self.ny, self.nx, 3))
     self.p = np.zeros((self.nz, self.ny, self.nx))
 
+    # Obstacle array
+    self.obstacle = np.zeros((self.nz, self.ny, self.nx))
+
 
 # Calculations -------------------------------------------------------------------------------------
   # Calculate flow
   def calculateFlow(self):
+    # Generate obstacle array
+    print("AF2:", "Create obstacle array")
+    self.createObstacleArray()
+
     # Calculate ray list
     print("AF2:", "Create ray list")
     self.createRayList()
@@ -432,20 +439,44 @@ class AirFlow2:
     return endPos, subRayList, False
 
 
-  # Check if point is in obstacle
-  def isPointInObstacle(self, posX, posY, posZ):
+  # Create obstacle array
+  def createObstacleArray(self):
     for obstacle in self.obstacleList:
-      # Convert layer number to metres, create the point and polygon 
-      tmpPoint = Point(posX/self.densPerMeter, posY/self.densPerMeter)
+      # Convert layer number to metres, create the point and polygon
       polygon = Polygon(obstacle["coordinates"])
 
-      # If point on the edge of polygon
-      if polygon.exterior.distance(tmpPoint) == 0 and posZ/self.densPerMeter <= obstacle["height"]:
-        return True
+      # Create pressure array
+      for z in range(self.nz):
+        for y in range(self.ny):
+          for x in range(self.nx):
+            if z/self.densPerMeter > obstacle["height"]:
+              continue
+            tmpPoint = Point(x/self.densPerMeter, y/self.densPerMeter)
+            # If point on the edge of polygon
+            if polygon.exterior.distance(tmpPoint) == 0 or polygon.contains(tmpPoint):
+              self.obstacle[z,y,x] = 1
+              continue
 
-      # If in obstacle (check height) return True
-      if polygon.contains(tmpPoint) and posZ/self.densPerMeter <= obstacle["height"]:
-        return True
+
+  # Check if point is in obstacle
+  def isPointInObstacle(self, posX, posY, posZ):
+    # for obstacle in self.obstacleList:
+    #   # Convert layer number to metres, create the point and polygon 
+    #   tmpPoint = Point(posX/self.densPerMeter, posY/self.densPerMeter)
+    #   polygon = Polygon(obstacle["coordinates"])
+
+    #   # If point on the edge of polygon
+    #   if polygon.exterior.distance(tmpPoint) == 0 and posZ/self.densPerMeter <= obstacle["height"]:
+    #     return True
+
+    #   # If in obstacle (check height) return True
+    #   if polygon.contains(tmpPoint) and posZ/self.densPerMeter <= obstacle["height"]:
+    #     return True
+    # return False
+    if posX >= self.nx or posX < 0 or posY >= self.ny or posY < 0 or posZ >= self.nz or posZ < 0:
+      return False
+    if self.obstacle[posZ,posY,posX] == 1:
+      return True
     return False
 
 
@@ -491,6 +522,13 @@ class AirFlow2:
         posX = ray[i][0]
         posY = ray[i][1]
         posZ = ray[i][2]
+
+        if posX >= self.nx:
+          continue
+        if posY >= self.ny:
+          continue
+        if posZ >= self.nz:
+          continue
         
         # Initialize starting point with 1, i is index of point in ray
         if i == 1:
@@ -519,7 +557,8 @@ class AirFlow2:
             self.v[posZ,posY,posX,2] /= 2
       
       # Add last position same value as previous
-      self.v[ray[-1][2],ray[-1][1],ray[-1][0]] = self.v[ray[-2][2],ray[-2][1],ray[-2][0]]
+      if ray[-1][0] < self.nx and ray[-2][0] < self.nx:
+        self.v[ray[-1][2],ray[-1][1],ray[-1][0]] = self.v[ray[-2][2],ray[-2][1],ray[-2][0]]
 
     # Create pressure array
     for z in range(self.nz):

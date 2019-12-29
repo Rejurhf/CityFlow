@@ -15,6 +15,8 @@ class GridCreator:
   
   # main function ----------------------------------------------------------------------------------
   def getGridElements(self):
+    print("[GC]", "Read OSM file ({})".format(self.osmFileName))
+
     # Get data from OSMgi
     osm = osmreader.OSMReader() # Declare OSMReader
     osm.apply_file(self.osmFileName)  # Connect to osm file
@@ -52,7 +54,7 @@ class GridCreator:
       
       # update ySize
       if (int(building["building_levels"]) * 3) > (self.zSize - 10):
-        self.zSize = (int(building["building_levels"]) * 3) + 30
+        self.zSize = (int(building["building_levels"]) * 3) + 10
 
       # Append building list with new building
       self.buildingList.append(tmpDict)

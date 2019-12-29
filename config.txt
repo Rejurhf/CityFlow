@@ -1,8 +1,8 @@
 {
   "name": "City Flow", 
-  "raydenspermeter": 1, 
+  "raydenspermeter": 0.5, 
   "osmmap": "resources/map2.osm", 
-  "visualize": ["top2"], 
+  "visualize": ["top2", "side23"], 
   "outbuildingname": "building", 
   "outrayname": "ray", 
   "savebuildings": "false", 
