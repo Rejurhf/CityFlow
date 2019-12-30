@@ -39,7 +39,6 @@ obstacleList.append(buildingDict)
 print("C:", "xSize: {}, ySize: {}, zSize: {}".format(xSize, ySize, zSize))
 print("C:", "Density per meter:", densPerMeter)
 print("C:", "Buildings: {}".format(len(obstacleList)))
-print(obstacleList)
 
 # Flow init
 print("C:", "Init flow")

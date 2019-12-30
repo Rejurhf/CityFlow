@@ -14,6 +14,7 @@ print("FFOMS:", "Density per meter:", densPerMeter)
 print("FFOMS:", "Buildings: {}".format(gridCreator.buildingListSize()))
 
 flow = airflow.AirFlow(xSize, ySize, zSize, densPerMeter, obstacleList)
+print(obstacleList)
 
 # Make simulation
 print("FFC:", "Start simulation")
@@ -28,7 +29,7 @@ print("FFC:", "Show Side View")
 flow.getSideViewLayerForMeter(30)
 
 # Get flow in single array
-# flowArray, pList = flow.getFlowArray()
+flowArray, pList = flow.getFlowArray()
 
 # Save array to file
 # filewriter.writeToJSON(obstacleList, "buildings")

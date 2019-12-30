@@ -32,18 +32,18 @@ class AirFlow2:
   # Calculate flow
   def calculateFlow(self):
     # Generate obstacle array
-    print("AF2:", "Create obstacle array")
+    print("[AF2]", "Create obstacle array")
     self.createObstacleArray()
 
     # Calculate ray list
-    print("AF2:", "Create ray list")
+    print("[AF2]", "Create ray list")
     self.createRayList()
 
     # Convert rays to 3d array
-    print("AF2:", "Converting rays to array")
+    print("[AF2]", "Converting rays to array")
     self.convertRaysTo3dArray()
 
-    print("AF2: Flow calculated")
+    print("[AF2] Flow calculated")
 
 
   # Calculate ray list
@@ -441,21 +441,51 @@ class AirFlow2:
 
   # Create obstacle array
   def createObstacleArray(self):
+    count = 0
+    numOfObstacle = len(self.obstacleList)
+    percentIndicator = 0
+    converters.printProgress(percentIndicator)
     for obstacle in self.obstacleList:
+      # Print progress
+      count += 1
+      if (percentIndicator+0.02) <= (count/numOfObstacle):
+        percentIndicator = round(percentIndicator+0.02, 2)
+        converters.printProgress(percentIndicator)
+
       # Convert layer number to metres, create the point and polygon
       polygon = Polygon(obstacle["coordinates"])
 
-      # Create pressure array
-      for z in range(self.nz):
-        for y in range(self.ny):
-          for x in range(self.nx):
-            if z/self.densPerMeter > obstacle["height"]:
-              continue
-            tmpPoint = Point(x/self.densPerMeter, y/self.densPerMeter)
-            # If point on the edge of polygon
-            if polygon.exterior.distance(tmpPoint) == 0 or polygon.contains(tmpPoint):
-              self.obstacle[z,y,x] = 1
-              continue
+      tmpX = int(obstacle["coordinates"][0][0]*self.densPerMeter)
+      tmpY = int(obstacle["coordinates"][0][1]*self.densPerMeter)
+      tmpZ = int((obstacle["height"]-1)*self.densPerMeter)
+
+      toVisitPoints = [[tmpX+x,tmpY+y,tmpZ+z] for x in [-1,0,1] for y in [-1,0,1] for z in [-1,0,1]]
+      visitedPoints = []
+
+      # Go troughs all to visit points
+      while toVisitPoints:
+        curPoint = toVisitPoints.pop(0)
+        visitedPoints.append(curPoint)
+
+        if self.isPointInBoundaries(curPoint) and \
+            (curPoint[2]/self.densPerMeter) <= obstacle["height"]:
+          tmpPoint = Point(curPoint[0]/self.densPerMeter, curPoint[1]/self.densPerMeter)
+          if polygon.exterior.distance(tmpPoint) == 0 or polygon.contains(tmpPoint):
+            self.obstacle[curPoint[2],curPoint[1],curPoint[0]] = 1
+
+            subVisitList = [[curPoint[0]+x,curPoint[1]+y,curPoint[2]+z] 
+              for x in [-1,0,1] for y in [-1,0,1] for z in [-1,0,1]]
+            for tmp in subVisitList:
+              if tmp not in toVisitPoints and tmp not in visitedPoints:
+                toVisitPoints.append(tmp)
+    converters.printProgress(1, end=True)
+
+  # Is point in boundaries check
+  def isPointInBoundaries(self, point):
+    if point[0] >= 0 and point[1] >= 0 and point[2] >= 0 and \
+        point[0] < self.nx and point[1] < self.ny and point[2] < self.nz:
+      return True
+    return False
 
 
   # Check if point is in obstacle
@@ -644,7 +674,7 @@ class AirFlow2:
 
     # Print text and display plot
     titleText = "{}m above ground ({} Z axis layer)".format(meterAboveGround, zLayer+1)
-    print("AF:", titleText)
+    print("AF:", "Show view", titleText)
     visualize.showPlot(X, Y, array2dX, array2dY, array2dP, listOf2dObstacles, titleText)
 
   
@@ -667,6 +697,6 @@ class AirFlow2:
     
     # Print text and display plot
     titleText = "{}m from left ({} Y axis layer)".format(meterFromY0, yLayer+1)
-    print("AF:", titleText)
+    print("AF:", "Show view", titleText)
     visualize.showPlot(X, Z, array2dX, array2dZ, array2dP, listOf2dObstacles, titleText)
 
