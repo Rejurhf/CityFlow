@@ -597,6 +597,22 @@ class AirFlow2:
           self.p[z,y,x] =  sum(abs(v) for v in self.v[z,y,x])
 
 
+  # Create ray dictionary list
+  def getRayFlowList(self):
+    rayDictList = []
+    for ray in self.rayList:
+      # Create Dict for ray
+      rayName = "Ray {}_{}_{}|{}".format(ray[0][0], ray[0][1], ray[0][1], len(ray))
+      tmpDict = {
+        "name": rayName,
+        "x": ray[0][0],
+        "y": ray[0][1],
+        "z": ray[0][2],
+        "layerpermeter": 1/self.densPerMeter,
+        "positions": ray,
+      }
+      rayDictList.append(tmpDict)
+    return rayDictList
 
 # Visualizations ----------------------------------------------------------------------------------- 
   # Convert 3d obstacles to 2d 
