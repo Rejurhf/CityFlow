@@ -71,10 +71,20 @@ def runSimulation(config):
 
   # Save buildings array to file
   if "saverays" in config and config["saverays"] == "True":
-    if "outrayname" in config:
-      filewriter.writeToJSON(flow.getRayFlowList(), config["outrayname"])
+    if "withoutstraightrays" in config and config["withoutstraightrays"] == "True":
+      withoutStraightRays = True
     else:
-      filewriter.writeToJSON(flow.getRayFlowList(), "rays")
+      withoutStraightRays = False
+    if "everynray" in config and float(config["everynray"]).is_integer():
+      everyNRay = config["everynray"]
+    else:
+      everyNRay = 1
+    if "outrayname" in config:
+      name = config["outrayname"]
+    else:
+      name = "ray"
+    filewriter.writeToJSON(flow.getRayFlowList(
+      withoutStraightRays=withoutStraightRays, everyNRay=everyNRay), name)
 
 
 # Main -----------------------------------------------------------------------

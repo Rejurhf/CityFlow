@@ -48,13 +48,13 @@ class GridCreator:
       # Create tmp dict of building
       tmpDict = {
         "name": building["name"],
-        "height": int(building["building_levels"]) * 3,
+        "height": int(float(building["building_levels"])) * 3,
         "coordinates": coorList
       }
       
       # update ySize
-      if (int(building["building_levels"]) * 3) > (self.zSize - 10):
-        self.zSize = (int(building["building_levels"]) * 3) + 10
+      if (int(float(building["building_levels"])) * 3) > (self.zSize - 10):
+        self.zSize = (int(float(building["building_levels"])) * 3) + 10
 
       # Append building list with new building
       self.buildingList.append(tmpDict)

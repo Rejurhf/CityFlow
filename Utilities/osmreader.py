@@ -49,6 +49,7 @@ class OSMReader(osmium.SimpleHandler):
     }
     self.buildingList.append(tmpDict)
 
+
   def addToNodeList(self, elem, elem_type):
     tmpDict ={
       "id": elem.id,

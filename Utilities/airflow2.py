@@ -587,7 +587,7 @@ class AirFlow2:
             self.v[posZ,posY,posX,2] /= 2
       
       # Add last position same value as previous
-      if ray[-1][0] < self.nx and ray[-2][0] < self.nx:
+      if len(ray) > 1 and ray[-1][0] < self.nx and ray[-2][0] < self.nx:
         self.v[ray[-1][2],ray[-1][1],ray[-1][0]] = self.v[ray[-2][2],ray[-2][1],ray[-2][0]]
 
     # Create pressure array
@@ -598,20 +598,25 @@ class AirFlow2:
 
 
   # Create ray dictionary list
-  def getRayFlowList(self):
+  def getRayFlowList(self, withoutStraightRays = False, everyNRay = 1):
+    counter = 0
     rayDictList = []
     for ray in self.rayList:
-      # Create Dict for ray
-      rayName = "Ray {}_{}_{}|{}".format(ray[0][0], ray[0][1], ray[0][1], len(ray))
-      tmpDict = {
-        "name": rayName,
-        "x": ray[0][0],
-        "y": ray[0][1],
-        "z": ray[0][2],
-        "layerpermeter": 1/self.densPerMeter,
-        "positions": ray,
-      }
-      rayDictList.append(tmpDict)
+      counter += 1
+      if withoutStraightRays and len(ray) not in [self.nx-1, self.nx, self.nx+1]:
+        continue
+      if counter%everyNRay == 0:
+        # Create Dict for ray
+        rayName = "Ray {}_{}_{}|{}".format(ray[0][0], ray[0][1], ray[0][1], len(ray))
+        tmpDict = {
+          "name": rayName,
+          "x": ray[0][0],
+          "y": ray[0][1],
+          "z": ray[0][2],
+          "layerpermeter": 1/self.densPerMeter,
+          "positions": ray,
+        }
+        rayDictList.append(tmpDict)
     return rayDictList
 
 # Visualizations ----------------------------------------------------------------------------------- 
@@ -690,7 +695,7 @@ class AirFlow2:
 
     # Print text and display plot
     titleText = "{}m above ground ({} Z axis layer)".format(meterAboveGround, zLayer+1)
-    print("AF:", "Show view", titleText)
+    print("[AF]", "Show view", titleText)
     visualize.showPlot(X, Y, array2dX, array2dY, array2dP, listOf2dObstacles, titleText)
 
   
@@ -713,6 +718,6 @@ class AirFlow2:
     
     # Print text and display plot
     titleText = "{}m from left ({} Y axis layer)".format(meterFromY0, yLayer+1)
-    print("AF:", "Show view", titleText)
+    print("[AF]", "Show view", titleText)
     visualize.showPlot(X, Z, array2dX, array2dZ, array2dP, listOf2dObstacles, titleText)
 
