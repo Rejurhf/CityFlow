@@ -14,8 +14,13 @@ rayCollection = bpy.data.collections.new(name="Rays")
 # Add collection to scene
 bpy.context.scene.collection.children.link(rayCollection)
 
+counter = 0
+length = len(rayList)
 
 for ray in rayList:
+    counter += 1
+    if counter%10 == 0:
+        print(counter, "/", length)
     name = ray["name"]
     startX = ray["x"]
     startY = ray["y"]

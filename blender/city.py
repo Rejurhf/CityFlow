@@ -11,7 +11,13 @@ buildingCollection = bpy.data.collections.new(name="Buildings")
 # Add collection to scene
 bpy.context.scene.collection.children.link(buildingCollection)
 
+counter = 0
+length = len(buildingList)
+
 for building in buildingList:
+    counter += 1
+    if counter%10 == 0:
+        print(counter, "/", length)
     coordinates = building["coordinates"]
     height = building["height"]
     name = building["name"]
