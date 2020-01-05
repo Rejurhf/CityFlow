@@ -605,13 +605,13 @@ class AirFlow2:
     rayDictList = []
     for ray in self.rayList:
       subRay = self.getSubRay(ray)
-      if withoutStraightRays and len(subRay) < 3:
+      if withoutStraightRays and len(subRay) <= 2:
         continue
       counter += 1
       if counter%everyNRay == 0:
         # Create sub ray list that omit straight lines (points on straight lines)
         # Create Dict for ray
-        rayName = "Ray {}_{}_{}|{}".format(ray[0][0], ray[0][1], ray[0][1], len(ray))
+        rayName = "Ray {}_{}_{}|{}".format(ray[0][0], ray[0][1], ray[0][2], len(ray))
         tmpDict = {
           "name": rayName,
           "x": ray[0][0],
@@ -627,6 +627,7 @@ class AirFlow2:
   # Create sub ray list that omit straight lines (points on straight lines)
   def getSubRay(self, ray):
     prevPos = []
+    tmpPosList = []
     subRayList = []
     for curPos in ray:
       # If first elem
@@ -637,9 +638,22 @@ class AirFlow2:
       
       # If point on streight line omit it
       if prevPos[1] == curPos[1] and prevPos[2] == curPos[2]:
+        tmpPosList.append(prevPos)
+        prevPos = curPos
         continue
 
+      # If there are omitted positions add one to avoid diagonal on all straight
+      if len(tmpPosList) >= 2:
+        subRayList.append(tmpPosList[-2])
+
+      if subRayList[-1][0] == curPos[0]:
+        subRayList[-1] = curPos
+        prevPos = curPos
+        continue
+      
       subRayList.append(curPos)
+      tmpPosList = []
+      prevPos = curPos
 
     # If last element not in subRayList, add it
     if subRayList[-1] != ray[-1]:
