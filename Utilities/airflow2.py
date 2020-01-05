@@ -28,6 +28,7 @@ class AirFlow2:
     self.obstacle = np.zeros((self.nz, self.ny, self.nx))
 
 
+
 # Calculations -------------------------------------------------------------------------------------
   # Calculate flow
   def calculateFlow(self):
@@ -148,6 +149,7 @@ class AirFlow2:
         self.rayList.append(rayPoints)
     converters.printProgress(1, end=True)
   
+
   # Get flow after obstacle
   def bGetBackRay(self, startPos, colisionPos, direction="x+"):
     # Determine obstacle size and multiply it by 3 to create shadow 
@@ -200,7 +202,6 @@ class AirFlow2:
 
   # Get nearest point after obstacle
   def sGetEndOfObstacleSide(self, startPos, colisionPos, startShift, direction="x+"):
-
     # Shift indicator
     shift = 1
 
@@ -542,6 +543,7 @@ class AirFlow2:
     return int((plusShift + minusShift)/2)
 
 
+
 # Rays to array ------------------------------------------------------------------------------------
   # Convert rays to 3d array
   def convertRaysTo3dArray(self):
@@ -602,10 +604,12 @@ class AirFlow2:
     counter = 0
     rayDictList = []
     for ray in self.rayList:
-      counter += 1
-      if withoutStraightRays and len(ray) not in [self.nx-1, self.nx, self.nx+1]:
+      subRay = self.getSubRay(ray)
+      if withoutStraightRays and len(subRay) < 3:
         continue
+      counter += 1
       if counter%everyNRay == 0:
+        # Create sub ray list that omit straight lines (points on straight lines)
         # Create Dict for ray
         rayName = "Ray {}_{}_{}|{}".format(ray[0][0], ray[0][1], ray[0][1], len(ray))
         tmpDict = {
@@ -614,10 +618,35 @@ class AirFlow2:
           "y": ray[0][1],
           "z": ray[0][2],
           "layerpermeter": 1/self.densPerMeter,
-          "positions": ray,
+          "positions": subRay,
         }
         rayDictList.append(tmpDict)
     return rayDictList
+
+
+  # Create sub ray list that omit straight lines (points on straight lines)
+  def getSubRay(self, ray):
+    prevPos = []
+    subRayList = []
+    for curPos in ray:
+      # If first elem
+      if not prevPos and curPos == ray[0]:
+        prevPos = curPos
+        subRayList.append(curPos)
+        continue
+      
+      # If point on streight line omit it
+      if prevPos[1] == curPos[1] and prevPos[2] == curPos[2]:
+        continue
+
+      subRayList.append(curPos)
+
+    # If last element not in subRayList, add it
+    if subRayList[-1] != ray[-1]:
+      subRayList.append(ray[-1])
+
+    return subRayList
+
 
 # Visualizations ----------------------------------------------------------------------------------- 
   # Convert 3d obstacles to 2d 
