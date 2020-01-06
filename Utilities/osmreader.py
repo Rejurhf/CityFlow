@@ -24,7 +24,7 @@ class OSMReader(osmium.SimpleHandler):
       name = elem.tags.get("addr:street") + " " + elem.tags.get("addr:housenumber")
     # Building levels
     if elem.tags.get("building:levels") is None:
-      building_levels = 2
+      building_levels = 5
     else:
       building_levels = elem.tags.get("building:levels")
     # Roof

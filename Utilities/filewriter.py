@@ -7,7 +7,7 @@ def write3dArrayToFile(array3d):
   outFileName = "{}T{}".format(now.strftime("%Y-%m-%d"), now.strftime("%H%M%S"))
 
   np.save(outFileName, array3d)
-  print("[FW]", "Array saved to {}".format(outFileName))
+  print("[Out]", "Array saved to {}".format(outFileName))
 
 
 def writeToJSON(data, fileName = "unknown"):
@@ -16,12 +16,12 @@ def writeToJSON(data, fileName = "unknown"):
 
   with open(outFileName, 'w') as outFile:
     json.dump(data, outFile)
-  print("[FW]", "Saved to {} JSON file".format(outFileName))
+  print("[Out]", "Saved to {} JSON file".format(outFileName))
 
 
 def readFromJSON(inFileName):
   with open(inFileName) as inFile:
     data = json.load(inFile)
-  print("[FW]", "Data red from {} JSON file".format(inFileName))
+  print("[In]", "Data red from {} JSON file".format(inFileName))
   
   return data

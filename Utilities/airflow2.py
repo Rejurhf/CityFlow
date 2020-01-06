@@ -2,7 +2,7 @@ import numpy as np
 import math
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
-from utilities import visualize, rays2dcalculator, converters
+from utilities import visualize, converters
 
 class AirFlow2:
   def __init__(self, xSize, ySize, zSize, densPerMeter, obstacleList):
@@ -33,18 +33,18 @@ class AirFlow2:
   # Calculate flow
   def calculateFlow(self):
     # Generate obstacle array
-    print("[AF2]", "Create obstacle array")
+    print("[I]", "Create obstacle array")
     self.createObstacleArray()
 
     # Calculate ray list
-    print("[AF2]", "Create ray list")
+    print("[I]", "Create ray list")
     self.createRayList()
 
     # Convert rays to 3d array
-    print("[AF2]", "Converting rays to array")
+    print("[I]", "Converting rays to array")
     self.convertRaysTo3dArray()
 
-    print("[AF2] Flow calculated")
+    print("[I] Flow calculated")
 
 
   # Calculate ray list
@@ -89,7 +89,7 @@ class AirFlow2:
           # edge shift parameter
           edgeShift = 0
           # Flow if obstacle involved
-          while stage > 0:
+          while stage > 0:          
             if stage == 1 and colisionPos:
               # direction="x+" means, obstacle por posX+=1
               posX, posY, posZ, subRayList, popCount, edgeShift = \
@@ -136,7 +136,6 @@ class AirFlow2:
                 stageCount += 1
 
             if stageCount > 10:
-              print(rayPoints[0])
               breakFlag = True
               break
           if breakFlag:
@@ -738,7 +737,7 @@ class AirFlow2:
 
     # Print text and display plot
     titleText = "{}m above ground ({} Z axis layer)".format(meterAboveGround, zLayer+1)
-    print("[AF]", "Show view", titleText)
+    print("[V]", "Show view", titleText)
     visualize.showPlot(X, Y, array2dX, array2dY, array2dP, listOf2dObstacles, titleText)
 
   
@@ -761,6 +760,6 @@ class AirFlow2:
     
     # Print text and display plot
     titleText = "{}m from left ({} Y axis layer)".format(meterFromY0, yLayer+1)
-    print("[AF]", "Show view", titleText)
+    print("[V]", "Show view", titleText)
     visualize.showPlot(X, Z, array2dX, array2dZ, array2dP, listOf2dObstacles, titleText)
 

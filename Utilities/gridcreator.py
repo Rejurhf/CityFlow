@@ -15,7 +15,7 @@ class GridCreator:
   
   # main function ----------------------------------------------------------------------------------
   def getGridElements(self):
-    print("[GC]", "Read OSM file ({})".format(self.osmFileName))
+    print("[I]", "Read OSM file ({})".format(self.osmFileName))
 
     # Get data from OSMgi
     osm = osmreader.OSMReader() # Declare OSMReader
