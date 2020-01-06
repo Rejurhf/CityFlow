@@ -6,7 +6,7 @@ import mathutils
 from mathutils import Vector
 
 # Open buildings file
-with open("D:\\Documents\\Studia\\Inzynierka\\CityFlow\\blender\\rays_191204T055656.txt") as inFile:
+with open("D:\\Documents\\Studia\\Inzynierka\\CityFlow\\blender\\ray_2_0.5_2.txt") as inFile:
     rayList = json.load(inFile)
 
 # Create new collection
@@ -58,6 +58,7 @@ for ray in rayList:
     # Generate bottom mesh
     bottom = bm.faces.new(bm.verts)
     
+    lastPos = -1
     # Start translations
     for curPos in positions:
         if flagSkipFirst:
