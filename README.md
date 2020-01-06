@@ -54,4 +54,4 @@ Aby przedstawić wizualizację należy uruchomic 2 skrypty `blender\city.py` i `
 
 W projekcie są dołączone przykładowe, wcześniej wygenerowane pliki z budynkami i promieniami.
 
-W skrypcie `city.py` należy podać ścieżkę do pliku `building_2`, a w skrypcie `rays.py` należy podać ścieżkę do pliku `ray_2_0.5_2`.
+W skrypcie `city.py` należy podać ścieżkę do pliku `building_2.txt`, a w skrypcie `rays.py` należy podać ścieżkę do pliku `ray_2_0.5_2.txt`.
